@@ -1,18 +1,27 @@
 // Smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', function() {
     // Add smooth scrolling to navigation links
-    const navLinks = document.querySelectorAll('.nav-link');
+    const navLinks = document.querySelectorAll('.nav-link, .footer-nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            const targetSection = document.querySelector(targetId);
+            const href = this.getAttribute('href');
             
-            if (targetSection) {
-                targetSection.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+            // If it's an external link or different page, let it navigate normally
+            if (href.includes('.html') || href.startsWith('http')) {
+                return; // Allow normal navigation
+            }
+            
+            // If it's an anchor link on the same page, prevent default and smooth scroll
+            if (href.startsWith('#')) {
+                e.preventDefault();
+                const targetSection = document.querySelector(href);
+                
+                if (targetSection) {
+                    targetSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
             }
         });
     });
