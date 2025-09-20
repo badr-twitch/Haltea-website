@@ -2617,7 +2617,7 @@ html {
     opacity: 0.15;
 }
 
-.feature-icon {
+.feature-card-3d .feature-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 25px;
@@ -2634,7 +2634,7 @@ html {
     transform: scale(1.1);
 }
 
-.feature-title {
+.feature-card-3d .feature-title {
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     font-weight: 600;
@@ -2644,7 +2644,7 @@ html {
     text-transform: uppercase;
 }
 
-.feature-description {
+.feature-card-3d .feature-description {
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: #D4AF37;
@@ -2854,17 +2854,17 @@ html {
         padding: 25px 20px;
     }
     
-    .feature-icon {
+    .feature-card-3d .feature-icon {
         width: 60px;
         height: 60px;
         margin-bottom: 20px;
     }
     
-    .feature-title {
+    .feature-card-3d .feature-title {
         font-size: 14px;
     }
     
-    .feature-description {
+    .feature-card-3d .feature-description {
         font-size: 13px;
     }
     
