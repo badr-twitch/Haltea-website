@@ -1,0 +1,20 @@
+{
+  "name": "haltea-backend",
+  "version": "1.0.0",
+  "description": "Backend server for HALTÉA luxury concierge website",
+  "main": "server.js",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["luxury", "concierge", "express", "nodemailer"],
+  "author": "HALTÉA",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "nodemailer": "^7.0.6"
+  }
+}
