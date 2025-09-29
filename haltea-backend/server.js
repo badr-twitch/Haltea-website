@@ -9,8 +9,10 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'file://'],
-    credentials: true
+    origin: true, // Allow all origins for development
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -20,7 +22,7 @@ app.use(express.static(path.join(__dirname, '../haltea-frontend')));
 
 // Email configuration
 const createTransporter = () => {
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
         service: 'gmail', // You can change this to other services
         auth: {
             user: process.env.EMAIL_USER,
@@ -33,28 +35,28 @@ const createTransporter = () => {
 const createEmailTemplate = (formData) => {
     return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
-        <div style="background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%); padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="background: #000000; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
             <h2 style="color: #D4AF37; text-align: center; margin-bottom: 30px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">
                 Nouveau Message - Conciergerie de Luxe
             </h2>
             
             <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 18px;">Informations du Client</h3>
-                <p style="color: #f0f0f0; margin: 8px 0;"><strong style="color: #D4AF37;">Nom:</strong> ${formData.name}</p>
-                <p style="color: #f0f0f0; margin: 8px 0;"><strong style="color: #D4AF37;">Email:</strong> ${formData.email}</p>
-                <p style="color: #f0f0f0; margin: 8px 0;"><strong style="color: #D4AF37;">Téléphone:</strong> ${formData.phone || 'Non fourni'}</p>
+                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Nom:</strong> ${formData.name}</p>
+                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Email:</strong> ${formData.email}</p>
+                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Téléphone:</strong> ${formData.phone || 'Non fourni'}</p>
             </div>
             
             <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 18px;">Message</h3>
-                <p style="color: #f0f0f0; line-height: 1.6; white-space: pre-wrap;">${formData.message}</p>
+                <p style="color: white; line-height: 1.6; white-space: pre-wrap; font-size: 16px; margin: 0;">${formData.message}</p>
             </div>
             
             <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
                 <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 18px;">Détails Techniques</h3>
-                <p style="color: #f0f0f0; margin: 5px 0;"><strong style="color: #D4AF37;">Date:</strong> ${new Date().toLocaleString('fr-FR')}</p>
-                <p style="color: #f0f0f0; margin: 5px 0;"><strong style="color: #D4AF37;">IP:</strong> ${formData.clientIP}</p>
-                <p style="color: #f0f0f0; margin: 5px 0;"><strong style="color: #D4AF37;">User Agent:</strong> ${formData.userAgent}</p>
+                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">Date:</strong> ${new Date().toLocaleString('fr-FR')}</p>
+                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">IP:</strong> ${formData.clientIP}</p>
+                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">User Agent:</strong> ${formData.userAgent}</p>
             </div>
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
@@ -69,6 +71,10 @@ const createEmailTemplate = (formData) => {
 
 // Contact form endpoint
 app.post('/api/contact', async (req, res) => {
+    console.log('\n📨 Contact form submission received:');
+    console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
+    console.log('📥 Request headers:', req.headers);
+    
     try {
         const { name, email, phone, message } = req.body;
         
@@ -95,7 +101,7 @@ app.post('/api/contact', async (req, res) => {
             email: email.trim(),
             phone: phone ? phone.trim() : '',
             message: message.trim(),
-            clientIP: req.ip || req.connection.remoteAddress || 'Unknown',
+            clientIP: req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'Unknown',
             userAgent: req.get('User-Agent') || 'Unknown'
         };
         
@@ -105,16 +111,22 @@ app.post('/api/contact', async (req, res) => {
         // Email options
         const mailOptions = {
             from: process.env.EMAIL_USER,
-            to: process.env.RECIPIENT_EMAIL || process.env.EMAIL_USER,
+            to: process.env.RECIPIENT_EMAIL,
             subject: `Nouveau Message - ${formData.name} - Conciergerie de Luxe`,
             html: createEmailTemplate(formData),
             replyTo: formData.email
         };
         
         // Send email
+        console.log('📤 Sending email with options:', {
+            from: mailOptions.from,
+            to: mailOptions.to,
+            subject: mailOptions.subject
+        });
+        
         const info = await transporter.sendMail(mailOptions);
         
-        console.log('Email sent successfully:', info.messageId);
+        console.log('✅ Email sent successfully:', info.messageId);
         
         res.status(200).json({
             success: true,
@@ -142,7 +154,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve frontend for all other routes
-app.get('*', (req, res) => {
+app.get(/^(?!\/api\/).*/, (req, res) => {
     res.sendFile(path.join(__dirname, '../haltea-frontend/index.html'));
 });
 

@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Form submission with validation
-        submitButton.addEventListener('click', function(e) {
+        submitButton.addEventListener('click', async function(e) {
             e.preventDefault();
             
             let isValid = true;
@@ -336,12 +336,19 @@ document.addEventListener('DOMContentLoaded', function() {
             // Validate all fields
             Object.keys(validationRules).forEach(fieldName => {
                 const field = contactForm.querySelector(`[name="${fieldName}"]`);
+                console.log(`🔍 Checking field: ${fieldName}`, field);
                 if (field) {
                     const fieldValid = validateField(fieldName, field);
+                    console.log(`✅ Field ${fieldName} validation result:`, fieldValid);
                     if (!fieldValid) {
+                        console.log(`❌ Field ${fieldName} failed validation`);
                         isValid = false;
                     }
                     formData[fieldName] = field.type === 'checkbox' ? field.checked : field.value.trim();
+                    console.log(`📝 Field ${fieldName} value:`, formData[fieldName]);
+                } else {
+                    console.log(`❌ Field ${fieldName} not found in form`);
+                    isValid = false;
                 }
             });
 
@@ -370,22 +377,75 @@ document.addEventListener('DOMContentLoaded', function() {
                     ripple.remove();
                 }, 600);
 
-                // Simulate form submission (replace with actual submission logic)
-                setTimeout(() => {
-                    console.log('Form submitted successfully!', formData);
+                // Handle contact form submission
+                try {
+                    console.log('🚀 Form submission started');
+                    console.log('📝 Form data:', formData);
                     
-                    // Show success message
-                    showSuccessMessage();
+                    // Validate required fields
+                    if (!formData.nom || !formData.email || !formData.message) {
+                        console.log('❌ Validation failed - missing required fields');
+                        showGeneralError();
+                        this.querySelector('.button-text').textContent = originalText;
+                        this.disabled = false;
+                        this.style.opacity = '1';
+                        return;
+                    }
                     
-                    // Reset form
-                    contactForm.reset();
+                    // Check consent checkbox
+                    const consentCheckbox = document.querySelector('input[name="consent"]');
+                    if (!consentCheckbox || !consentCheckbox.checked) {
+                        console.log('❌ Validation failed - consent not checked');
+                        showGeneralError();
+                        this.querySelector('.button-text').textContent = originalText;
+                        this.disabled = false;
+                        this.style.opacity = '1';
+                        return;
+                    }
                     
+                    console.log('✅ Validation passed');
+                    console.log('📤 Sending request to:', 'http://localhost:3001/api/contact');
+                    
+                    // Transform form data to match backend API expectations
+                    const apiData = {
+                        name: formData.nom,
+                        email: formData.email,
+                        phone: formData.telephone,
+                        message: formData.message
+                    };
+                    
+                    console.log('📤 Sending API data:', apiData);
+                    
+                    const response = await fetch('http://localhost:3001/api/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(apiData)
+                    });
+                    
+                    console.log('📥 Response received:', response.status, response.statusText);
+                    const result = await response.json();
+                    console.log('📥 Response data:', result);
+                    
+                    if (result.success) {
+                        console.log('✅ Success! Email sent with ID:', result.messageId);
+                        showSuccessMessage();
+                        contactForm.reset();
+                    } else {
+                        console.log('❌ Server returned error:', result.message);
+                        showGeneralError();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Network/Request error:', error);
+                    showGeneralError();
+                } finally {
                     // Reset button
                     this.querySelector('.button-text').textContent = originalText;
                     this.disabled = false;
                     this.style.opacity = '1';
-                    
-                }, 2000);
+                }
             } else {
                 // Show general error message
                 showGeneralError();
