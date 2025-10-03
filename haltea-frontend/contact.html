@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="contact-page">
     <!-- Header Section -->
     <header class="header">
         <div class="header-container">
@@ -18,7 +18,7 @@
                 <!-- Language Flags -->
                 <div class="language-flags">
                     <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjRkZGRkZGIi8+CjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDAyMzk1Ii8+CjxyZWN0IHg9IjE2IiB3aWR0aD0iOCIgaGVpZ2h0PSIxOCIgZmlsbD0iI0VEMjEyMiIvPgo8L3N2Zz4K" alt="French Flag" class="flag">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDEyMTY5Ii8+CjxwYXRoIGQ9Ik0xMiAwdjE4IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjMiLz4KPHBhdGggZD0iTTAgOWgyNCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIzIi8+CjxwYXRoIGQ9Ik0xMiAwdjE4IiBzdHJva2U9IiNEMjAxMjIiIHN0cm9rZS13aWR0aD0iMS41Ii8+CjxwYXRoIGQ9Ik0wIDloMjQiIHN0cm9rZT0iI0QyMDEyMiIgc3Ryb2tlLXdpZHRoPSIxLjUiLz4KPC9zdmc+" alt="UK Flag" class="flag">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NDAiIGhlaWdodD0iNDgwIj4NCiAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTAgMGg2NDB2NDgwSDB6Ii8+DQogIDxwYXRoIGZpbGw9IiNDRTExMjQiIGQ9Ik0wIDE5Mmg2NDB2OTZIMHpNMjcyIDBoOTZ2NDgwaC05NnoiLz4NCjwvc3ZnPg0K" alt="UK Flag" class="flag">
                 </div>
 
                 <!-- Logo -->
@@ -39,12 +39,11 @@
             <!-- Bottom Row: Navigation -->
             <nav class="navigation">
                 <ul class="nav-list">
-                    <li><a href="index.html" class="nav-link">ACCUEIL</a></li>
-                    <li><a href="services.html" class="nav-link">NOS SERVICES</a></li>
-                    <li><a href="index.html#references" class="nav-link">RÉFÉRENCES</a></li>
-                    <li><a href="conciergerie.html" class="nav-link">CONCIERGERIE</a></li>
-                    <li><a href="realisations.html" class="nav-link">NOS RÉALISATIONS</a></li>
-                    <li><a href="contact.html" class="nav-link active">CONTACT</a></li>
+                    <li><a href="index.html" class="nav-link" data-translate="nav_accueil">ACCUEIL</a></li>
+                    <li><a href="services.html" class="nav-link" data-translate="nav_nos_services">NOS SERVICES</a></li>
+                    <li><a href="conciergerie.html" class="nav-link" data-translate="nav_conciergerie">CONCIERGERIE</a></li>
+                    <li><a href="realisations.html" class="nav-link" data-translate="nav_nos_réalisations">NOS RÉALISATIONS</a></li>
+                    <li><a href="contact.html" class="nav-link active" data-translate="nav_contact">CONTACT</a></li>
                 </ul>
             </nav>
         </div>
@@ -65,10 +64,10 @@
             <!-- Header Section -->
             <div class="contact-header">
                 <h1 class="contact-title">
-                    <span class="title-line">CONTACT</span>
+                    <span class="title-line" data-translate="contact_title">CONTACT</span>
                     <div class="title-underline"></div>
                 </h1>
-                <p class="contact-subtitle">
+                <p class="contact-subtitle" data-translate="contact_subtitle">
                     Pour toute question ou demande, n'hésitez pas à nous joindre.
                 </p>
             </div>
@@ -83,14 +82,14 @@
                             <!-- Civilité -->
                             <div class="form-group">
                                 <label for="civilite" class="form-label">
-                                    <span class="label-text">Civilité</span>
+                                    <span class="label-text" data-translate="form_title">Civilité</span>
                                     <span class="label-line"></span>
                                 </label>
                                 <div class="select-wrapper-3d">
                                     <select id="civilite" name="civilite" class="form-select">
-                                        <option value="">Choisir..</option>
-                                        <option value="madame">Madame</option>
-                                        <option value="monsieur">Monsieur</option>
+                                        <option value="" data-translate="form_choose">Choisir..</option>
+                                        <option value="madame" data-translate="form_madame">Madame</option>
+                                        <option value="monsieur" data-translate="form_monsieur">Monsieur</option>
                                     </select>
                                     <div class="select-arrow-3d">
                                         <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -103,37 +102,37 @@
                             <!-- Nom -->
                             <div class="form-group">
                                 <label for="nom" class="form-label">
-                                    <span class="label-text">Nom</span>
+                                    <span class="label-text" data-translate="form_name">Nom</span>
                                     <span class="label-line"></span>
                                 </label>
-                                <input type="text" id="nom" name="nom" class="form-input" placeholder="Prénom">
+                                <input type="text" id="nom" name="nom" class="form-input" placeholder="Prénom" data-translate-placeholder="form_name_placeholder">
                             </div>
 
                             <!-- Email -->
                             <div class="form-group">
                                 <label for="email" class="form-label">
-                                    <span class="label-text">Email</span>
+                                    <span class="label-text" data-translate="form_email">Email</span>
                                     <span class="label-line"></span>
                                 </label>
-                                <input type="email" id="email" name="email" class="form-input" placeholder="Email">
+                                <input type="email" id="email" name="email" class="form-input" placeholder="Email" data-translate-placeholder="form_email_placeholder">
                             </div>
 
                             <!-- Téléphone -->
                             <div class="form-group">
                                 <label for="telephone" class="form-label">
-                                    <span class="label-text">Téléphone</span>
+                                    <span class="label-text" data-translate="form_phone">Téléphone</span>
                                     <span class="label-line"></span>
                                 </label>
-                                <input type="tel" id="telephone" name="telephone" class="form-input" placeholder="Téléphone">
+                                <input type="tel" id="telephone" name="telephone" class="form-input" placeholder="Téléphone" data-translate-placeholder="form_phone_placeholder">
                             </div>
 
                             <!-- Message -->
                             <div class="form-group">
                                 <label for="message" class="form-label">
-                                    <span class="label-text">Votre message</span>
+                                    <span class="label-text" data-translate="form_message">Votre message</span>
                                     <span class="label-line"></span>
                                 </label>
-                                <textarea id="message" name="message" class="form-textarea" placeholder="Envoyer ce message concernant cette formule. Vous acceptez notre politique de confidentialité."></textarea>
+                                <textarea id="message" name="message" class="form-textarea" placeholder="Envoyer ce message concernant cette formule. Vous acceptez notre politique de confidentialité." data-translate-placeholder="form_message_placeholder"></textarea>
                             </div>
 
                             <!-- Checkbox -->
@@ -143,13 +142,13 @@
                                     <div class="checkbox-custom-3d">
                                         <div class="checkbox-inner"></div>
                                     </div>
-                                    <span class="checkbox-text">Je souhaite recevoir des informations. J'accepte notre politique de confidentialité.</span>
+                                    <span class="checkbox-text" data-translate="checkbox_text">Je souhaite recevoir des informations. J'accepte notre politique de confidentialité.</span>
                                 </label>
                             </div>
 
                             <!-- Submit Button -->
                             <button type="submit" class="submit-button-3d">
-                                <span class="button-text">ENVOYER</span>
+                                <span class="button-text" data-translate="form_send">ENVOYER</span>
                                 <div class="button-glow"></div>
                                 <div class="button-particles"></div>
                             </button>
@@ -163,7 +162,7 @@
                         <div class="info-glow"></div>
                         <div class="info-content">
                             <h3 class="contact-info-title">
-                                <span class="title-text">Nos coordonnées</span>
+                                <span class="title-text" data-translate="contact_info_title">Nos coordonnées</span>
                                 <div class="title-decoration"></div>
                             </h3>
                             
@@ -221,7 +220,7 @@
                                     </div>
                                     <div class="info-details">
                                         <p>Lun-Ven 9h-18h</p>
-                                        <p style="margin-top: 10px; font-style: italic; opacity: 0.9;">Notre équipe est disponible du lundi au vendredi, de 9h à 18h.<br>Vous pouvez aussi nous écrire via ce formulaire, nous répondons sous 24h !</p>
+                                        <p style="margin-top: 10px; font-style: italic; opacity: 0.9;" data-translate="team_availability">Notre équipe est disponible du lundi au vendredi, de 9h à 18h.<br>Vous pouvez aussi nous écrire via ce formulaire, nous répondons sous 24h !</p>
                                     </div>
                                 </div>
                             </div>
@@ -260,7 +259,6 @@
                 <ul class="footer-nav-list">
                     <li><a href="index.html" class="footer-nav-link">ACCUEIL</a></li>
                     <li><a href="services.html" class="footer-nav-link">NOS SERVICES</a></li>
-                    <li><a href="index.html#references" class="footer-nav-link">RÉFÉRENCES</a></li>
                     <li><a href="conciergerie.html" class="footer-nav-link">CONCIERGERIE</a></li>
                     <li><a href="realisations.html" class="footer-nav-link">NOS RÉALISATIONS</a></li>
                     <li><a href="contact.html" class="footer-nav-link active">CONTACT</a></li>

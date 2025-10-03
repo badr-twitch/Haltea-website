@@ -6,10 +6,26 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     background-color: #000000;
     color: #ffffff;
     overflow-x: hidden;
+}
+
+/* General paragraph styling matching accueil-description - excluding contact page */
+body:not(.contact-page) p,
+.accueil-section p,
+.services-section p,
+.realisations-section p,
+.conciergerie-section p,
+.conciergerie-main p,
+.services-main p,
+.realisations-main p {
+    font-family: 'Helvetica', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    letter-spacing: 0.3px;
+    color: #e0e0e0;
 }
 
 /* Header Styles */
@@ -209,7 +225,7 @@ body {
 }
 
 .hero-subtitle {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: clamp(1.1rem, 2.5vw, 1.5rem);
     font-weight: 300;
     color: #e0e0e0;
@@ -226,7 +242,7 @@ body {
     border: 2px solid #ffffff;
     color: #ffffff;
     padding: 18px 40px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 2px;
@@ -301,7 +317,7 @@ body {
 }
 
 .accueil-description {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: clamp(1rem, 2vw, 1.2rem);
     font-weight: 300;
     color: #e0e0e0;
@@ -341,7 +357,7 @@ body {
 }
 
 .feature-text {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 16px;
     font-weight: 500;
     color: #ffffff;
@@ -411,7 +427,7 @@ body {
 }
 
 .placeholder-content p {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     color: #D4AF37;
     margin-top: 15px;
@@ -460,7 +476,7 @@ body {
 }
 
 .shape-text {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 12px;
     font-weight: 600;
     color: #ffffff;
@@ -511,7 +527,7 @@ body {
 }
 
 .pillar {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 2px;
@@ -855,7 +871,7 @@ body {
 }
 
 .partners-subtitle {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: clamp(1rem, 2vw, 1.2rem);
     font-weight: 300;
     color: #e0e0e0;
@@ -891,6 +907,19 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.partner-logo {
+    width: 200px;
+    height: 100px;
+    object-fit: contain;
+    filter: brightness(0) invert(1); /* Makes logos white */
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.partner-logo:hover {
+    opacity: 1;
 }
 
 .logo-placeholder {
@@ -1016,7 +1045,7 @@ body {
 }
 
 .testimonials-subtitle {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: clamp(1rem, 2vw, 1.2rem);
     font-weight: 300;
     color: #e0e0e0;
@@ -1120,7 +1149,7 @@ body {
 }
 
 .testimonial-text {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 16px;
     font-weight: 400;
     color: #e0e0e0;
@@ -1140,7 +1169,7 @@ body {
 }
 
 .author-name {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 18px;
     font-weight: 600;
     color: #ffffff;
@@ -1149,7 +1178,7 @@ body {
 }
 
 .author-profession {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #D4AF37;
@@ -1268,7 +1297,7 @@ body {
 }
 
 .company-name {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 18px;
     font-weight: 600;
     color: #e0e0e0;
@@ -1292,7 +1321,7 @@ body {
 .footer-nav-link {
     color: #e0e0e0;
     text-decoration: none;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 1px;
@@ -1494,7 +1523,7 @@ body {
 }
 
 .contact-subtitle {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: clamp(1.1rem, 2.5vw, 1.4rem);
     font-weight: 300;
     color: #D4AF37;
@@ -1583,7 +1612,7 @@ body {
 }
 
 .label-text {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     font-weight: 600;
     color: #D4AF37;
@@ -1605,7 +1634,7 @@ body {
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 12px;
     padding: 18px 25px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     color: #D4AF37;
     transition: all 0.4s ease;
@@ -1714,7 +1743,7 @@ body {
 }
 
 .checkbox-text {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     color: #D4AF37;
     line-height: 1.6;
@@ -1727,7 +1756,7 @@ body {
     border: none;
     border-radius: 12px;
     padding: 20px 40px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 16px;
     font-weight: 700;
     color: #000000;
@@ -1859,7 +1888,7 @@ body {
 }
 
 .contact-info-title {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: #D4AF37;
@@ -1967,7 +1996,7 @@ body {
 }
 
 .info-details p {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     color: #D4AF37;
     margin: 0;
@@ -2369,6 +2398,14 @@ html {
     min-height: 180px;
 }
 
+.youtube-iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    border: none;
+    border-radius: 15px;
+}
+
 .video-logo {
     position: absolute;
     top: 15px;
@@ -2445,7 +2482,7 @@ html {
 }
 
 .banner-text {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
     font-weight: 600;
     color: #ffffff;
@@ -2563,14 +2600,14 @@ html {
 }
 
 .time-display {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 12px;
     color: #ffffff;
     white-space: nowrap;
 }
 
 .youtube-brand {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 12px;
     font-weight: 500;
     color: #ffffff;
@@ -2594,7 +2631,7 @@ html {
     border: 1px solid rgba(212, 175, 55, 0.3);
     border-radius: 8px;
     padding: 12px 20px;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 12px;
     font-weight: 500;
     color: #ffffff;
@@ -2911,6 +2948,10 @@ html {
         min-height: 140px;
     }
     
+    .youtube-iframe {
+        min-height: 200px;
+    }
+    
     .features-section {
         margin-bottom: 60px;
     }
@@ -3088,13 +3129,13 @@ html {
 .photos-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 40px;
+    gap: 50px;
     margin-top: 60px;
 }
 
 .photo-item {
     position: relative;
-    aspect-ratio: 16/10;
+    aspect-ratio: 16/11;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 215, 0, 0.1);
@@ -3213,7 +3254,7 @@ html {
     }
     
     .photos-grid {
-        gap: 20px;
+        gap: 30px;
     }
     
     .keyphrases-grid {
@@ -3354,7 +3395,7 @@ html {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 215, 0, 0.8);
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    max-width: 280px;
+    max-width: 380px;
     margin: 0 auto;
 }
 
@@ -3496,6 +3537,22 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.team-member-image {
+    width: 120px;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 0;
+    display: block;
+    filter: brightness(1.2);
+    transition: all 0.4s ease;
+}
+
+.team-member-image:hover {
+    filter: brightness(1.4) drop-shadow(0 0 20px #D4AF37) drop-shadow(0 0 40px #D4AF37);
+    transform: scale(1.05);
+}
     position: relative;
     overflow: hidden;
 }
@@ -3561,7 +3618,7 @@ html {
     }
     
     .photo-frame {
-        max-width: 300px;
+        max-width: 400px;
         margin: 0 auto;
     }
     
@@ -3695,7 +3752,7 @@ html {
     }
     
     .photo-frame {
-        max-width: 280px;
+        max-width: 350px;
     }
 }
 
@@ -3714,7 +3771,7 @@ html {
 
 /* Form Message Styles */
 .form-message {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Helvetica', sans-serif;
     font-size: 14px;
 }
 
@@ -3731,4 +3788,116 @@ html {
 
 .form-message .message-text {
     flex: 1;
+}
+
+/* Realisation Photos Styling */
+.realisation-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* Alexandre Photo Styling - Real Frame Effect */
+.alexandre-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    
+    /* Frame border effect */
+    border: 8px solid #8B7355;
+    box-shadow: 
+        /* Main shadow */
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        /* Outer glow */
+        0 0 0 1px rgba(255, 215, 0, 0.2);
+    
+    /* Remove blur-causing properties */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+.photo-frame {
+    /* Enhanced frame container */
+    position: relative;
+    background: linear-gradient(135deg, #8B7355 0%, #6B5B47 50%, #8B7355 100%);
+    border-radius: 25px;
+    padding: 12px;
+    box-shadow: 
+        /* Frame shadow */
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        /* Inner frame highlight */
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.photo-frame::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.photo-frame::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%);
+    border-radius: 18px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* PAWEL Logo Image Styling */
+.pawel-logo-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    max-width: 300px;
+    max-height: 150px;
+    transition: all 0.3s ease;
+    filter: hue-rotate(180deg) saturate(2) brightness(1.3) contrast(1.1);
+}
+
+/* Partnership Section Layout - Match Screenshot */
+.partnership-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.partnership-text {
+    flex: 1;
+    text-align: left;
+}
+
+.partnership-text p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+    margin: 0;
+}
+
+.partnership-logo {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

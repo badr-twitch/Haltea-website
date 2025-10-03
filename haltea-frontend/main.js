@@ -1,5 +1,18 @@
+// Language switching functionality
+let currentLanguage = localStorage.getItem('selectedLanguage') || 'fr'; // Default to French, check localStorage
+
 // Smooth scrolling for navigation links
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize language switching
+    initializeLanguageSwitching();
+    
+    // Apply saved language on page load
+    if (currentLanguage === 'en') {
+        applyLanguage('en');
+    }
+    
+    // Video Action Buttons Functionality (for conciergerie page)
+    initializeVideoButtons();
     // Add smooth scrolling to navigation links
     const navLinks = document.querySelectorAll('.nav-link, .footer-nav-link');
     navLinks.forEach(link => {
@@ -585,3 +598,450 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Video Action Buttons Functionality
+function initializeVideoButtons() {
+    // Découvrir Nos Services Button
+    const discoverServicesBtn = document.querySelector('.discover-services');
+    if (discoverServicesBtn) {
+        discoverServicesBtn.addEventListener('click', function() {
+            // Navigate to services page to show our conciergerie services
+            window.location.href = 'services.html';
+        });
+    }
+
+    // À regarder Button
+    const watchBtn = document.querySelector('.watch-btn');
+    if (watchBtn) {
+        watchBtn.addEventListener('click', function() {
+            // Redirect directly to YouTube video
+            const youtubeUrl = 'https://youtu.be/0tTHfQWIiUA';
+            window.open(youtubeUrl, '_blank');
+        });
+    }
+
+    // Partager Button
+    const shareBtn = document.querySelector('.share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            const pageTitle = 'PAWEL Concierge - HALTÉA';
+            const pageUrl = window.location.href;
+            
+            // Check if Web Share API is supported
+            if (navigator.share) {
+                navigator.share({
+                    title: pageTitle,
+                    text: 'Découvrez notre service de conciergerie de luxe avec PAWEL Concierge',
+                    url: pageUrl
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                // Fallback: Copy URL to clipboard
+                navigator.clipboard.writeText(pageUrl).then(() => {
+                    // Show a temporary notification
+                    showNotification('Lien copié dans le presse-papiers!');
+                }).catch(() => {
+                    // Final fallback: show alert
+                    alert('Partagez cette page: ' + pageUrl);
+                });
+            }
+        });
+    }
+
+    // Helper function to show notifications
+    function showNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #D4AF37;
+            color: #000;
+            padding: 15px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        `;
+        notification.textContent = message;
+        
+        // Add animation CSS if not already added
+        if (!document.querySelector('#notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+}
+
+// Language Switching Functionality
+function initializeLanguageSwitching() {
+    // Get French flag elements
+    const frenchFlags = document.querySelectorAll('.flag[alt="French Flag"]');
+    const ukFlags = document.querySelectorAll('.flag[alt="UK Flag"]');
+    
+    // French flag click handler
+    frenchFlags.forEach(flag => {
+        flag.addEventListener('click', function() {
+            switchToFrench();
+        });
+    });
+    
+    // UK flag click handler
+    ukFlags.forEach(flag => {
+        flag.addEventListener('click', function() {
+            switchToEnglish();
+        });
+    });
+}
+
+function switchToEnglish() {
+    currentLanguage = 'en';
+    localStorage.setItem('selectedLanguage', 'en');
+    applyLanguage('en');
+    showLanguageNotification('Language switched to English');
+}
+
+function switchToFrench() {
+    currentLanguage = 'fr';
+    localStorage.setItem('selectedLanguage', 'fr');
+    applyLanguage('fr');
+    showLanguageNotification('Langue changée en français');
+}
+
+function applyLanguage(language) {
+    // Update page title
+    const pageTitle = document.querySelector('title');
+    if (pageTitle) {
+        const currentTitle = pageTitle.textContent;
+        if (language === 'en' && currentTitle.includes('HALTÉA')) {
+            pageTitle.textContent = currentTitle.replace('HALTÉA', 'HALTEA');
+        } else if (language === 'fr' && currentTitle.includes('HALTEA')) {
+            pageTitle.textContent = currentTitle.replace('HALTEA', 'HALTÉA');
+        }
+    }
+    
+            // Translate all elements with data-translate attribute
+            const translatableElements = document.querySelectorAll('[data-translate]');
+            translatableElements.forEach(element => {
+                const translationKey = element.getAttribute('data-translate');
+                let translatedText;
+
+                if (language === 'en') {
+                    translatedText = translations[translationKey];
+                } else if (language === 'fr') {
+                    translatedText = frenchTranslations[translationKey];
+                }
+
+                if (translatedText) {
+                    element.textContent = translatedText;
+                }
+            });
+
+            // Translate all elements with data-translate-placeholder attribute
+            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const translationKey = element.getAttribute('data-translate-placeholder');
+                let translatedText;
+
+                if (language === 'en') {
+                    translatedText = translations[translationKey];
+                } else if (language === 'fr') {
+                    translatedText = frenchTranslations[translationKey];
+                }
+
+                if (translatedText) {
+                    element.placeholder = translatedText;
+                }
+            });
+    
+    // Update navigation links
+    updateNavigationLinks(language);
+    
+    // Update page-specific content
+    updatePageContent(language);
+}
+
+function updateNavigationLinks(language) {
+    const navLinks = document.querySelectorAll('.nav-link, .footer-nav-link');
+    navLinks.forEach(link => {
+        const translationKey = link.getAttribute('data-translate');
+        if (translationKey) {
+            if (language === 'en') {
+                link.textContent = translations[translationKey];
+            } else if (language === 'fr') {
+                link.textContent = frenchTranslations[translationKey];
+            }
+        }
+    });
+}
+
+function updatePageContent(language) {
+    // Update specific page content based on current page
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    if (currentPage === 'conciergerie.html') {
+        updateConciergerieContent(language);
+    } else if (currentPage === 'services.html') {
+        updateServicesContent(language);
+    } else if (currentPage === 'realisations.html') {
+        updateRealisationsContent(language);
+    } else if (currentPage === 'contact.html') {
+        updateContactContent(language);
+    } else {
+        updateHomepageContent(language);
+    }
+}
+
+// Translation object
+const translations = {
+    // Navigation
+    'nav_accueil': 'HOME',
+    'nav_conciergerie': 'CONCIERGE',
+    'nav_nos_services': 'OUR SERVICES',
+    'nav_nos_réalisations': 'OUR REALIZATIONS',
+    'nav_contact': 'CONTACT',
+    
+    // Homepage
+    'hero_title': 'WELCOME DIFFERENTLY',
+    'hero_subtitle': 'Ultra VIP personal accompaniment for your events',
+    'hero_cta': 'DISCOVER',
+    'pillar_protocole': 'PROTOCOL',
+    'pillar_ultravip': 'ULTRA VIP',
+    'pillar_coordination': 'COORDINATION',
+    'pillar_elegance': 'ELEGANCE',
+    'pillar_discretion': 'DISCRETION',
+    'accueil_title': 'PERSONALIZED WELCOME',
+    'accueil_description': 'An exceptional service that transforms every encounter into a memorable experience. Our dedicated team orchestrates every detail with precision, elegance and discretion, creating a unique atmosphere for your most prestigious guests.',
+    'protocole_title': 'PROTOCOL',
+    'protocole_description': 'Our expertise in protocol ensures perfect organization for your events and official ceremonies.',
+    'conciergerie_title': 'CONCIERGE',
+    'conciergerie_description': 'A dedicated concierge service to meet all your requests with discretion and efficiency.',
+    'nos_partenaires_title': 'OUR PARTNERS',
+    'ce_que_disent_title': 'WHAT OUR PARTNERS SAY',
+    'feature_premium': 'Premium Service',
+    'feature_details': 'Attention to Details',
+    'feature_excellence': 'Excellence',
+    'image_coming': 'Image coming soon',
+    'shape_accueil': 'Personalized Welcome',
+    'shape_protocole': 'Protocol',
+    'shape_vip': 'VIP/UltraVIP',
+    'partners_title': 'OUR PARTNERS',
+    'testimonials_title': 'WHAT OUR PARTNERS SAY',
+    'testimonial_1_text': '"A huge thank you to you Alexandre Nasser! Your attitude and professionalism have been absolutely remarkable."',
+    'testimonial_1_author': 'Guillaume Bourdeloux',
+    'testimonial_1_role': 'Director of the International Air and Space Show',
+    'testimonial_2_text': '"As Protocol Manager of the Show, Alexandre brilliantly managed coordination with elected officials and all protocol procedures, even in the face of unforeseen events and last-minute adjustments. Thank you again for your commitment!"',
+    'testimonial_2_author': 'Ferielle Deriche',
+    'testimonial_2_role': 'Show Protocol Manager',
+    'company_name': 'HALTEA',
+    
+    // Conciergerie page
+    'conciergerie_main_title': 'LUXURY CONCIERGE FOR YOUR EVENTS',
+    'conciergerie_partnership_intro': 'In exclusive partnership with PAWEL Concierge, HALTEA provides you with an exceptional concierge service, inspired by the greatest palaces. This service brings elegance, responsiveness and refinement to your events.',
+    'conciergerie_feature_1_title': 'WELCOME & ORIENTATION',
+    'conciergerie_feature_1_desc': 'Hosts and hostesses trained in luxury codes to welcome and guide your guests with elegance.',
+    'conciergerie_feature_2_title': 'PALACE-TYPE CONCIERGE',
+    'conciergerie_feature_2_desc': 'A real on-site concierge desk: transfers, reservations, personalized recommendations - real-time assistance.',
+    'conciergerie_feature_3_title': 'ANIMATION & EXPERIENCE',
+    'conciergerie_feature_3_desc': 'Creating a unique atmosphere for your guests. Attentive, balanced and discreet service to enhance your event.',
+    'partnership_text': 'This strategic partnership with PAWEL Concierge allows HALTEA to complete its protocol expertise with a concierge service inspired by the most prestigious hotel standards.',
+    'discover_services_btn': 'DISCOVER OUR SERVICES',
+    'watch_btn': 'Watch',
+    'share_btn': 'Share',
+    
+    // Services page
+    'services_title': 'OUR SERVICES',
+    'services_description': 'We offer a complete range of services to meet all your needs with excellence and discretion.',
+    'equipes_title': 'OUR TEAMS',
+    'alexandre_name': 'Alexandre Nasser',
+    'alexandre_desc_1': 'Alexandre Nasser is a specialist in welcoming and handling important personalities during events. I manage protocol, guest schedules, transportation, taxis...',
+    'alexandre_desc_2': 'A true Swiss army knife, I adapt to the clientele and your specific requests.',
+    'alexandre_desc_3': 'Collaborating with HALTEA, I can guide you towards their general reception and luxury concierge services.',
+    'illustration_1': 'Illustration 1',
+    'illustration_2': 'Illustration 2',
+    'illustration_3': 'Illustration 3',
+    'illustration_4': 'Illustration 4',
+    'role_1': 'Protocol Manager / VIP Clientele',
+    'role_2': 'Head Concierge',
+    'role_3': 'Qualified Concierge',
+    'role_4': 'Bellhops and Groom Staff',
+    
+    // Realisations page
+    'realisations_title': 'OUR REALIZATIONS',
+    'realisations_description': 'HALTEA puts its expertise at the service of the largest international events: protocol management, Ultra-VIP accompaniment and reception of official delegations from different countries.',
+    'keyphrase_1': 'Protocol & Official Reception',
+    'keyphrase_2': 'Ultra VIP & Personalized',
+    'keyphrase_3': 'International Delegation',
+    'keyphrase_4': 'Diplomatic & Institutional Coordination',
+    
+    // Contact page
+    'contact_title': 'CONTACT',
+    'contact_subtitle': 'For any questions or requests, do not hesitate to contact us.',
+    'contact_info_title': 'Our coordinates',
+    'form_title': 'Title',
+    'form_choose': 'Choose..',
+    'form_madame': 'Madame',
+    'form_monsieur': 'Monsieur',
+    'form_name': 'Name',
+    'form_name_placeholder': 'First Name',
+    'form_email': 'Email',
+    'form_email_placeholder': 'Email',
+    'form_phone': 'Phone',
+    'form_phone_placeholder': 'Phone',
+    'form_message': 'Your message',
+    'form_message_placeholder': 'Send this message regarding this formula. You accept our privacy policy.',
+    'checkbox_text': 'I wish to receive information. I accept our privacy policy.',
+    'form_send': 'SEND',
+    'team_availability': 'Our team is available Monday to Friday, from 9am to 6pm.<br>You can also write to us via this form, we respond within 24h!'
+};
+
+// French translations object
+const frenchTranslations = {
+    // Navigation
+    'nav_accueil': 'ACCUEIL',
+    'nav_conciergerie': 'CONCIERGERIE',
+    'nav_nos_services': 'NOS SERVICES',
+    'nav_nos_réalisations': 'NOS RÉALISATIONS',
+    'nav_contact': 'CONTACT',
+    
+    // Homepage
+    'hero_title': 'ACCUEILLIR AUTREMENT',
+    'hero_subtitle': 'Accompagnement personnel Ultra VIP au service de vos événements',
+    'hero_cta': 'DÉCOUVRIR',
+    'pillar_protocole': 'PROTOCOLE',
+    'pillar_ultravip': 'ULTRAVIP',
+    'pillar_coordination': 'COORDINATION',
+    'pillar_elegance': 'ÉLÉGANCE',
+    'pillar_discretion': 'DISCRÉTION',
+    'accueil_title': 'ACCUEIL PERSONNALISÉ',
+    'accueil_description': 'Un service d\'exception qui transforme chaque rencontre en une expérience mémorable. Notre équipe dédiée orchestre chaque détail avec précision, élégance et discretion, créant une atmosphère unique pour vos invités les plus prestigieux.',
+    'protocole_title': 'PROTOCOLE',
+    'protocole_description': 'Notre expertise en protocole garantit une organisation parfaite pour vos événements et cérémonies officielles.',
+    'conciergerie_title': 'CONCIERGERIE',
+    'conciergerie_description': 'Un service de conciergerie dédié pour répondre à toutes vos demandes avec discrétion et efficacité.',
+    'nos_partenaires_title': 'NOS PARTENAIRES',
+    'ce_que_disent_title': 'CE QUE DISENT NOS PARTENAIRES',
+    'feature_premium': 'Service Premium',
+    'feature_details': 'Attention Détails',
+    'feature_excellence': 'Excellence',
+    'image_coming': 'Image à venir',
+    'shape_accueil': 'Accueil Personnalisé',
+    'shape_protocole': 'Protocole',
+    'shape_vip': 'VIP/UltraVIP',
+    'partners_title': 'NOS PARTENAIRES',
+    'testimonials_title': 'CE QUE DISENT NOS PARTENAIRES',
+    'testimonial_1_text': '"Un immense merci à toi Alexandre Nasser! Ton attitude et ton professionnalisme ont été absolument remarquable."',
+    'testimonial_1_author': 'Guillaume Bourdeloux',
+    'testimonial_1_role': 'Directeur du Salon internationale de l\'aeronotiaue et de l\'espace',
+    'testimonial_2_text': '"En tant que Responsable Protocole du Salon, Alexandre a su gerer avec brio la coordination avec les élus et toute procie protocole, méme face aux imprévus et ajustements de dernière minute. Merci encore pour ton engagement!"',
+    'testimonial_2_author': 'Ferielle Deriche',
+    'testimonial_2_role': 'Responsable Protocole du Salon',
+    'company_name': 'HALTÉA',
+    
+    // Conciergerie page
+    'conciergerie_main_title': 'CONCIERGERIE DE LUXE POUR VOS ÉVÉNEMENTS',
+    'conciergerie_partnership_intro': 'En partenariat exclusif avec PAWEL Concierge, HALTÉA met à votre disposition un service de conciergerie d\'exception, inspiré des plus grands palaces. Cette prestation apporte élégance, réactivité et raffinement à vos événements.',
+    'conciergerie_feature_1_title': 'ACCUEIL & ORIENTATION',
+    'conciergerie_feature_1_desc': 'Des hôtes et hôtesses formés aux codes du luxe pour accueillir et guider vos invités avec élégance.',
+    'conciergerie_feature_2_title': 'CONCIERGERIE TYPE PALACE',
+    'conciergerie_feature_2_desc': 'Un véritable bureau de conciergerie sur site : transferts, réservations, recommandations personnalisées - assistance en temps réel.',
+    'conciergerie_feature_3_title': 'ANIMATION & EXPÉRIENCE',
+    'conciergerie_feature_3_desc': 'Création d\'une atmosphère unique pour vos invités. Service attentif, équilibrant et discret pour sublimer votre événement.',
+    'partnership_text': 'Ce partenariat stratégique avec PAWEL Concierge permet à HALTÉA de compléter son savoir-faire protocolaire par une conciergerie, inspirée des standards hôteliers les plus prestigieux.',
+    'discover_services_btn': 'DÉCOUVRIR NOS SERVICES',
+    'watch_btn': 'À regarder',
+    'share_btn': 'Partager',
+    
+    // Services page
+    'services_title': 'NOS SERVICES',
+    'services_description': 'Nous vous proposons une gamme complète de services pour répondre à tous vos besoins avec excellence et discrétion.',
+    'equipes_title': 'NOS ÉQUIPES',
+    'alexandre_name': 'Alexandre Nasser',
+    'alexandre_desc_1': 'Alexandre Nasser est spécialiste dans l\'accueil et la prise en charge de personnalités importantes lors d\'événements. Je gère le protocole, l\'agenda des invités, les déplacements, les taxis...',
+    'alexandre_desc_2': 'Véritable couteau suisse, je m\'adapte à la clientèle et à vos demandes spécifiques.',
+    'alexandre_desc_3': 'Collaborant avec HALTÉA, je peux vous orienter vers leurs services d\'accueil général et de conciergerie de luxe.',
+    'illustration_1': 'Illustration 1',
+    'illustration_2': 'Illustration 2',
+    'illustration_3': 'Illustration 3',
+    'illustration_4': 'Illustration 4',
+    'role_1': 'Responsable Protocole / Clientèle VIP',
+    'role_2': 'Chef Concierge',
+    'role_3': 'Concierge qualifié',
+    'role_4': 'Chasseurs et Groom Groomettes',
+    
+    // Realisations page
+    'realisations_title': 'NOS RÉALISATIONS',
+    'realisations_description': 'HALTÉA met son savoir-faire au service des plus grands événements internationaux : gestion du protocole, accompagnement Ultra-VIP et accueil des délégations officielles de différents pays.',
+    'keyphrase_1': 'Protocolé & acceuil officiel',
+    'keyphrase_2': 'Ultra VIP & Personnalisé',
+    'keyphrase_3': 'Délégation internationale',
+    'keyphrase_4': 'Coordination diplomatique & institutionnelle',
+    
+    // Contact page
+    'contact_title': 'CONTACT',
+    'contact_subtitle': 'Pour toute question ou demande, n\'hésitez pas à nous joindre.',
+    'contact_info_title': 'Nos coordonnées',
+    'form_title': 'Civilité',
+    'form_choose': 'Choisir..',
+    'form_madame': 'Madame',
+    'form_monsieur': 'Monsieur',
+    'form_name': 'Nom',
+    'form_name_placeholder': 'Prénom',
+    'form_email': 'Email',
+    'form_email_placeholder': 'Email',
+    'form_phone': 'Téléphone',
+    'form_phone_placeholder': 'Téléphone',
+    'form_message': 'Votre message',
+    'form_message_placeholder': 'Envoyer ce message concernant cette formule. Vous acceptez notre politique de confidentialité.',
+    'checkbox_text': 'Je souhaite recevoir des informations. J\'accepte notre politique de confidentialité.',
+    'form_send': 'ENVOYER',
+    'team_availability': 'Notre équipe est disponible du lundi au vendredi, de 9h à 18h.<br>Vous pouvez aussi nous écrire via ce formulaire, nous répondons sous 24h !'
+};
+
+function updateHomepageContent(language) {
+    // Update homepage specific content
+}
+
+function updateConciergerieContent(language) {
+    // Update conciergerie specific content
+}
+
+function updateServicesContent(language) {
+    // Update services specific content
+}
+
+function updateRealisationsContent(language) {
+    // Update realisations specific content
+}
+
+function updateContactContent(language) {
+    // Update contact specific content
+}
+
+function showLanguageNotification(message) {
+    showNotification(message);
+}
