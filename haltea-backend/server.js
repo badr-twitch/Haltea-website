@@ -23,7 +23,9 @@ app.use(express.static(path.join(__dirname, '../haltea-frontend')));
 // Email configuration
 const createTransporter = () => {
     return nodemailer.createTransport({
-        service: 'gmail', // You can change this to other services
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS
@@ -74,39 +76,47 @@ app.post('/api/contact', async (req, res) => {
     console.log('\n📨 Contact form submission received:');
     console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
     console.log('📥 Request headers:', req.headers);
+    console.log('🔧 Environment variables check:');
+    console.log('   EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Missing');
+    console.log('   EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Missing');
+    console.log('   RECIPIENT_EMAIL:', process.env.RECIPIENT_EMAIL ? '✅ Set' : '❌ Missing');
+    
+    // Extract and validate data first
+    const { name, email, phone, message } = req.body;
+    
+    // Validation
+    if (!name || !email || !message) {
+        return res.status(400).json({
+            success: false,
+            message: 'Nom, email et message sont requis'
+        });
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Format d\'email invalide'
+        });
+    }
+    
+    // Prepare email data (moved outside try block)
+    const formData = {
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone ? phone.trim() : '',
+        message: message.trim(),
+        clientIP: req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'Unknown',
+        userAgent: req.get('User-Agent') || 'Unknown'
+    };
     
     try {
-        const { name, email, phone, message } = req.body;
-        
-        // Validation
-        if (!name || !email || !message) {
-            return res.status(400).json({
-                success: false,
-                message: 'Nom, email et message sont requis'
-            });
-        }
-        
-        // Email validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Format d\'email invalide'
-            });
-        }
-        
-        // Prepare email data
-        const formData = {
-            name: name.trim(),
-            email: email.trim(),
-            phone: phone ? phone.trim() : '',
-            message: message.trim(),
-            clientIP: req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'Unknown',
-            userAgent: req.get('User-Agent') || 'Unknown'
-        };
         
         // Create transporter
+        console.log('🔧 Creating email transporter...');
         const transporter = createTransporter();
+        console.log('✅ Transporter created successfully');
         
         // Email options
         const mailOptions = {
@@ -123,6 +133,13 @@ app.post('/api/contact', async (req, res) => {
             to: mailOptions.to,
             subject: mailOptions.subject
         });
+        console.log('🔧 Transporter configuration:', {
+            host: transporter.options.host,
+            port: transporter.options.port,
+            secure: transporter.options.secure
+        });
+        
+        console.log('📤 Attempting to send email...');
         
         const info = await transporter.sendMail(mailOptions);
         
@@ -135,11 +152,25 @@ app.post('/api/contact', async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error('❌ Error sending email:', error);
+        console.error('Error details:', {
+            code: error.code,
+            command: error.command,
+            errno: error.errno,
+            syscall: error.syscall,
+            message: error.message,
+            stack: error.stack
+        });
         
+        // Log the form data for manual processing if email fails
+        console.log('📝 Form data received (for manual processing):', JSON.stringify(formData, null, 2));
+        
+        // Return appropriate error response
+        const errorMessage = error.message || 'Erreur interne du serveur';
         res.status(500).json({
             success: false,
-            message: 'Erreur lors de l\'envoi du message. Veuillez réessayer plus tard.'
+            message: 'Erreur lors de l\'envoi du message. Veuillez réessayer plus tard.',
+            debug: process.env.NODE_ENV === 'development' ? errorMessage : undefined
         });
     }
 });
@@ -152,6 +183,7 @@ app.get('/api/health', (req, res) => {
         uptime: process.uptime()
     });
 });
+
 
 // Serve frontend for all other routes
 app.get(/^(?!\/api\/).*/, (req, res) => {

@@ -151,7 +151,7 @@ body:not(.contact-page) p,
 /* Hero Section */
 .hero {
     position: relative;
-    height: 80vh;
+    height: 100vh;
     margin-top: 130px;
     display: flex;
     align-items: center;
@@ -166,15 +166,27 @@ body:not(.contact-page) p,
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('https://res.cloudinary.com/dzadublkk/image/upload/w_1920,h_1080,c_fill,q_auto:best,f_auto/v1759105413/WhatsApp_Image_2025-09-22_at_12.37.12_33655838_jr08ci.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center center;
-    filter: brightness(1.1) contrast(1.15) saturate(1.15);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%);
+    z-index: 1;
+}
+
+.hero-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    filter: brightness(1.15) contrast(1.25) saturate(1.2) hue-rotate(5deg);
     image-rendering: -webkit-optimize-contrast;
     image-rendering: -moz-crisp-edges;
     image-rendering: crisp-edges;
     image-rendering: pixelated;
+    image-rendering: high-quality;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform;
     z-index: -2;
 }
 
@@ -188,6 +200,7 @@ body:not(.contact-page) p,
     background-image: 
         radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+    z-index: -1;
 }
 
 .hero-overlay {

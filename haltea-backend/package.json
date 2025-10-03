@@ -8,10 +8,17 @@
     "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["luxury", "concierge", "express", "nodemailer"],
+  "keywords": [
+    "luxury",
+    "concierge",
+    "express",
+    "nodemailer"
+  ],
   "author": "HALTÉA",
   "license": "MIT",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
+    "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
