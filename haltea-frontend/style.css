@@ -2964,6 +2964,7 @@ html {
     
     .partnership-text {
         order: 1;
+        text-align: center;
     }
     
     .video-actions {
@@ -4003,10 +4004,7 @@ html {
 
 /* Partnership Section Layout - Match Screenshot */
 
-.partnership-text {
-    flex: 1;
-    text-align: left;
-}
+/* Removed duplicate partnership-text definition */
 
 .partnership-text p {
     font-size: 1.1rem;

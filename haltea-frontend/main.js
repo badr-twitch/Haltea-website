@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     console.log('✅ Validation passed');
-                    console.log('📤 Sending request to:', 'http://localhost:3001/api/contact');
+                    console.log('📤 Sending request to:', 'https://haltea-server.onrender.com/api/contact');
                     
                     // Transform form data to match backend API expectations
                     const apiData = {
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     console.log('📤 Sending API data:', apiData);
                     
-                    const response = await fetch('http://localhost:3001/api/contact', {
+                    const response = await fetch('https://haltea-server.onrender.com/api/contact', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
