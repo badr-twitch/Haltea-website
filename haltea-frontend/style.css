@@ -3722,7 +3722,7 @@ html {
 
 @media (max-width: 768px) {
     .services-main {
-        padding: 120px 0 50px;
+        padding: 220px 0 50px;
     }
     
     .services-container {
@@ -3762,11 +3762,17 @@ html {
         font-size: 0.85rem;
         max-width: 160px;
     }
+    
+    /* Alexandre Photo - Mobile Size */
+    .photo-frame {
+        max-width: 280px;
+        margin: 0 auto;
+    }
 }
 
 @media (max-width: 480px) {
     .services-main {
-        padding: 100px 0 40px;
+        padding: 200px 0 40px;
     }
     
     .services-title,
@@ -3806,8 +3812,10 @@ html {
         gap: 20px;
     }
     
+    /* Alexandre Photo - Smaller Mobile Size */
     .photo-frame {
-        max-width: 350px;
+        max-width: 250px;
+        margin: 0 auto;
     }
 }
 
