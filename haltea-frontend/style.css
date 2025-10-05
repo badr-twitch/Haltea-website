@@ -777,6 +777,12 @@ body:not(.contact-page) p,
         margin-top: 80px;
     }
     
+    /* Mobile Hero Background - Landscape orientation */
+    .hero-background-image {
+        object-fit: cover;
+        object-position: center center;
+    }
+    
     .hero-content {
         padding: 0 15px;
         margin-top: 0;
@@ -825,13 +831,14 @@ body:not(.contact-page) p,
     }
     
     .accueil-visual {
-        height: 300px;
+        height: 250px;
         order: -1;
+        margin-bottom: 20px;
     }
     
     .image-container-3d {
-        width: 380px;
-        height: 420px;
+        width: 280px;
+        height: 320px;
     }
     
     .floating-shape {
@@ -997,6 +1004,11 @@ body:not(.contact-page) p,
         width: 150px;
         height: 75px;
     }
+    
+    .partner-logo {
+        width: 150px;
+        height: 75px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1013,6 +1025,11 @@ body:not(.contact-page) p,
     }
     
     .logo-placeholder {
+        width: 120px;
+        height: 60px;
+    }
+    
+    .partner-logo {
         width: 120px;
         height: 60px;
     }
@@ -3841,6 +3858,11 @@ html {
     border-radius: 15px;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* Focus on middle image - show 30% more content */
+.photo-item:nth-child(2) .realisation-photo {
+    object-position: center 30%;
 }
 
 /* Alexandre Photo Styling - Real Frame Effect */
