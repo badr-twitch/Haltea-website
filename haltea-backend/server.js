@@ -34,9 +34,12 @@ const createTransporter = (provider = 'gmail') => {
             tls: {
                 rejectUnauthorized: false
             },
-            connectionTimeout: 30000,
-            greetingTimeout: 15000,
-            socketTimeout: 30000
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
+            pool: false,
+            maxConnections: 1,
+            maxMessages: 1
         },
         gmail_alt: {
             host: 'smtp.gmail.com',
@@ -49,9 +52,12 @@ const createTransporter = (provider = 'gmail') => {
             tls: {
                 rejectUnauthorized: false
             },
-            connectionTimeout: 30000,
-            greetingTimeout: 15000,
-            socketTimeout: 30000
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
+            pool: false,
+            maxConnections: 1,
+            maxMessages: 1
         },
         gmail_ssl: {
             host: 'smtp.gmail.com',
@@ -64,9 +70,12 @@ const createTransporter = (provider = 'gmail') => {
             tls: {
                 rejectUnauthorized: false
             },
-            connectionTimeout: 30000,
-            greetingTimeout: 15000,
-            socketTimeout: 30000
+            connectionTimeout: 10000,
+            greetingTimeout: 5000,
+            socketTimeout: 10000,
+            pool: false,
+            maxConnections: 1,
+            maxMessages: 1
         }
     };
     
@@ -161,24 +170,35 @@ app.post('/api/contact', async (req, res) => {
             replyTo: formData.email
         };
         
-        // Try multiple SMTP providers
+        // Try multiple SMTP providers with timeout
         const providers = ['gmail', 'gmail_alt', 'gmail_ssl'];
         let lastError = null;
         
         for (const provider of providers) {
             try {
                 console.log(`🔧 Trying ${provider} SMTP provider...`);
-                const transporter = createTransporter(provider);
-                console.log(`✅ ${provider} transporter created successfully`);
                 
-                console.log('📤 Sending email with options:', {
-                    from: mailOptions.from,
-                    to: mailOptions.to,
-                    subject: mailOptions.subject,
-                    provider: provider
+                // Add timeout wrapper for each provider attempt
+                const emailPromise = (async () => {
+                    const transporter = createTransporter(provider);
+                    console.log(`✅ ${provider} transporter created successfully`);
+                    
+                    console.log('📤 Sending email with options:', {
+                        from: mailOptions.from,
+                        to: mailOptions.to,
+                        subject: mailOptions.subject,
+                        provider: provider
+                    });
+                    
+                    return await transporter.sendMail(mailOptions);
+                })();
+                
+                // Race between email sending and timeout
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error(`${provider} timeout after 15 seconds`)), 15000);
                 });
                 
-                const info = await transporter.sendMail(mailOptions);
+                const info = await Promise.race([emailPromise, timeoutPromise]);
                 
                 console.log(`✅ Email sent successfully via ${provider}:`, info.messageId);
                 
