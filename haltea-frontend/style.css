@@ -2115,7 +2115,7 @@ body:not(.contact-page) p,
 
 @media (max-width: 768px) {
     .contact-main {
-        padding: 140px 0 80px;
+        padding: 260px 0 80px;
     }
     
     .contact-container {
@@ -2153,7 +2153,7 @@ body:not(.contact-page) p,
 
 @media (max-width: 480px) {
     .contact-main {
-        padding: 120px 0 60px;
+        padding: 240px 0 60px;
     }
     
     .contact-container {
@@ -2916,7 +2916,7 @@ html {
 
 @media (max-width: 768px) {
     .conciergerie-main {
-        padding: 140px 0 80px;
+        padding: 260px 0 80px;
     }
     
     .conciergerie-container {
@@ -2954,8 +2954,16 @@ html {
     
     .partnership-content {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 30px;
         text-align: center;
+    }
+    
+    .partnership-logo {
+        order: -1;
+    }
+    
+    .partnership-text {
+        order: 1;
     }
     
     .video-actions {
@@ -2970,7 +2978,7 @@ html {
 
 @media (max-width: 480px) {
     .conciergerie-main {
-        padding: 120px 0 60px;
+        padding: 240px 0 60px;
     }
     
     .conciergerie-container {
@@ -3322,7 +3330,7 @@ html {
 
 @media (max-width: 768px) {
     .realisations-main {
-        padding: 140px 0 60px;
+        padding: 260px 0 60px;
     }
     
     .realisations-container {
@@ -3348,6 +3356,10 @@ html {
 }
 
 @media (max-width: 480px) {
+    .realisations-main {
+        padding: 240px 0 60px;
+    }
+    
     .realisations-title {
         font-size: 2rem;
     }
@@ -3722,7 +3734,7 @@ html {
 
 @media (max-width: 768px) {
     .services-main {
-        padding: 220px 0 50px;
+        padding: 260px 0 50px;
     }
     
     .services-container {
@@ -3772,7 +3784,7 @@ html {
 
 @media (max-width: 480px) {
     .services-main {
-        padding: 200px 0 40px;
+        padding: 240px 0 40px;
     }
     
     .services-title,
@@ -3990,14 +4002,6 @@ html {
 }
 
 /* Partnership Section Layout - Match Screenshot */
-.partnership-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 60px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
 
 .partnership-text {
     flex: 1;
