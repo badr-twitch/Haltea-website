@@ -849,7 +849,7 @@ const translations = {
     'testimonial_1_role': 'Director of the International Air and Space Show',
     'testimonial_2_text': '"As Protocol Manager of the Show, Alexandre brilliantly managed coordination with elected officials and all protocol procedures, even in the face of unforeseen events and last-minute adjustments. Thank you again for your commitment!"',
     'testimonial_2_author': 'Ferielle Deriche',
-    'testimonial_2_role': 'Show Protocol Manager',
+    'testimonial_2_role': 'Director of the Real Estate Show',
     'company_name': 'HALTEA',
     
     // Conciergerie page
