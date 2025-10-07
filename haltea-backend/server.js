@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -32,32 +33,17 @@ const createTransporter = (provider = 'gmail') => {
                 pass: process.env.EMAIL_PASS
             },
             tls: {
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
+                ciphers: 'SSLv3'
             },
-            connectionTimeout: 10000,
-            greetingTimeout: 5000,
-            socketTimeout: 10000,
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+            socketTimeout: 5000,
             pool: false,
             maxConnections: 1,
-            maxMessages: 1
-        },
-        gmail_alt: {
-            host: 'smtp.gmail.com',
-            port: 25,
-            secure: false,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            tls: {
-                rejectUnauthorized: false
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 5000,
-            socketTimeout: 10000,
-            pool: false,
-            maxConnections: 1,
-            maxMessages: 1
+            maxMessages: 1,
+            logger: false,
+            debug: false
         },
         gmail_ssl: {
             host: 'smtp.gmail.com',
@@ -68,14 +54,49 @@ const createTransporter = (provider = 'gmail') => {
                 pass: process.env.EMAIL_PASS
             },
             tls: {
-                rejectUnauthorized: false
+                rejectUnauthorized: false,
+                minVersion: 'TLSv1'
             },
-            connectionTimeout: 10000,
-            greetingTimeout: 5000,
-            socketTimeout: 10000,
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+            socketTimeout: 5000,
             pool: false,
             maxConnections: 1,
-            maxMessages: 1
+            maxMessages: 1,
+            logger: false,
+            debug: false
+        },
+        sendgrid: {
+            host: 'smtp.sendgrid.net',
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'apikey',
+                pass: process.env.SENDGRID_API_KEY || ''
+            },
+            tls: {
+                rejectUnauthorized: false
+            },
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+            socketTimeout: 5000,
+            pool: false
+        },
+        mailgun: {
+            host: 'smtp.mailgun.org',
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.MAILGUN_USER || '',
+                pass: process.env.MAILGUN_PASS || ''
+            },
+            tls: {
+                rejectUnauthorized: false
+            },
+            connectionTimeout: 5000,
+            greetingTimeout: 3000,
+            socketTimeout: 5000,
+            pool: false
         }
     };
     
@@ -171,36 +192,44 @@ app.post('/api/contact', async (req, res) => {
         };
         
         // Try multiple SMTP providers with timeout
-        const providers = ['gmail', 'gmail_alt', 'gmail_ssl'];
+        const providers = ['gmail', 'gmail_ssl', 'sendgrid', 'mailgun'];
         let lastError = null;
+        let successfulProvider = null;
         
         for (const provider of providers) {
             try {
-                console.log(`🔧 Trying ${provider} SMTP provider...`);
+                console.log(`\n🔧 Attempting ${provider} SMTP provider...`);
+                console.log(`⏰ Timeout: 10 seconds`);
                 
                 // Add timeout wrapper for each provider attempt
                 const emailPromise = (async () => {
                     const transporter = createTransporter(provider);
-                    console.log(`✅ ${provider} transporter created successfully`);
+                    console.log(`✅ ${provider} transporter created`);
                     
-                    console.log('📤 Sending email with options:', {
-                        from: mailOptions.from,
-                        to: mailOptions.to,
-                        subject: mailOptions.subject,
-                        provider: provider
-                    });
+                    // Verify transporter configuration
+                    console.log(`🔍 Verifying ${provider} connection...`);
+                    await transporter.verify();
+                    console.log(`✅ ${provider} connection verified`);
                     
-                    return await transporter.sendMail(mailOptions);
+                    console.log(`📤 Sending email via ${provider}...`);
+                    const result = await transporter.sendMail(mailOptions);
+                    console.log(`✅ ${provider} send completed`);
+                    
+                    return result;
                 })();
                 
-                // Race between email sending and timeout
+                // Race between email sending and timeout (10 seconds)
                 const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error(`${provider} timeout after 15 seconds`)), 15000);
+                    setTimeout(() => reject(new Error(`${provider} timeout after 10 seconds`)), 10000);
                 });
                 
                 const info = await Promise.race([emailPromise, timeoutPromise]);
                 
-                console.log(`✅ Email sent successfully via ${provider}:`, info.messageId);
+                console.log(`\n🎉 SUCCESS! Email sent via ${provider}`);
+                console.log(`📧 Message ID: ${info.messageId}`);
+                console.log(`📨 Response: ${info.response}`);
+                
+                successfulProvider = provider;
                 
                 return res.status(200).json({
                     success: true,
@@ -210,44 +239,41 @@ app.post('/api/contact', async (req, res) => {
                 });
                 
             } catch (providerError) {
-                console.log(`❌ ${provider} failed:`, providerError.message);
+                console.log(`\n❌ ${provider} FAILED`);
+                console.log(`   Error: ${providerError.message}`);
+                console.log(`   Code: ${providerError.code || 'N/A'}`);
                 lastError = providerError;
                 continue;
             }
         }
         
-        // If all providers failed, try webhook fallback
-        console.log('🔄 All SMTP providers failed, trying webhook fallback...');
+        // If all providers failed, log detailed error info
+        console.log('\n⚠️  ALL SMTP PROVIDERS FAILED');
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('📝 FORM DATA FOR MANUAL PROCESSING:');
+        console.log(JSON.stringify(formData, null, 2));
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.log('⚠️  Last Error:', lastError.message);
+        console.log('⚠️  Error Code:', lastError.code);
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+        
+        // Save to file as fallback
+        const failedEmailsPath = path.join(__dirname, 'failed_emails.log');
+        const logEntry = `\n[${new Date().toISOString()}] FAILED EMAIL\n${JSON.stringify(formData, null, 2)}\nError: ${lastError.message}\n${'='.repeat(80)}\n`;
         
         try {
-            // Use a webhook service like EmailJS or similar
-            const webhookUrl = 'https://api.emailjs.com/api/v1.0/email/send';
-            const webhookData = {
-                service_id: 'service_placeholder',
-                template_id: 'template_placeholder',
-                user_id: 'user_placeholder',
-                template_params: {
-                    name: formData.name,
-                    email: formData.email,
-                    phone: formData.phone,
-                    message: formData.message
-                }
-            };
-            
-            // For now, just log the data for manual processing
-            console.log('📝 Webhook fallback - Form data for manual processing:', JSON.stringify(formData, null, 2));
-            
-            // Return success even if email fails (graceful degradation)
-            return res.status(200).json({
-                success: true,
-                message: 'Message reçu! Nous vous contacterons dans les plus brefs délais.',
-                note: 'Email delivery delayed, but your message was received.'
-            });
-            
-        } catch (webhookError) {
-            console.log('❌ Webhook fallback also failed:', webhookError.message);
-            throw lastError;
+            fs.appendFileSync(failedEmailsPath, logEntry);
+            console.log('✅ Failed email logged to file: failed_emails.log');
+        } catch (fsError) {
+            console.log('❌ Could not write to log file:', fsError.message);
         }
+        
+        // Return success to user (graceful degradation)
+        return res.status(200).json({
+            success: true,
+            message: 'Message reçu! Nous vous contacterons dans les plus brefs délais.',
+            note: 'Your message has been received and logged for manual processing.'
+        });
         
     } catch (error) {
         console.error('❌ Error sending email:', error);
