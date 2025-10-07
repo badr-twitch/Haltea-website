@@ -3,6 +3,7 @@ const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 require('dotenv').config();
 
 const app = express();
@@ -103,6 +104,75 @@ const createTransporter = (provider = 'gmail') => {
     return nodemailer.createTransport(configs[provider] || configs.gmail);
 };
 
+// SendGrid HTTP API email sender (bypasses SMTP blockage)
+const sendEmailViaSendGrid = (formData, mailOptions) => {
+    return new Promise((resolve, reject) => {
+        const apiKey = process.env.SENDGRID_API_KEY;
+        
+        if (!apiKey) {
+            return reject(new Error('SENDGRID_API_KEY not configured'));
+        }
+        
+        const emailData = JSON.stringify({
+            personalizations: [{
+                to: [{ email: mailOptions.to }],
+                subject: mailOptions.subject
+            }],
+            from: { email: mailOptions.from },
+            reply_to: { email: formData.email },
+            content: [{
+                type: 'text/html',
+                value: mailOptions.html
+            }]
+        });
+        
+        const options = {
+            hostname: 'api.sendgrid.com',
+            port: 443,
+            path: '/v3/mail/send',
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(emailData)
+            }
+        };
+        
+        const req = https.request(options, (res) => {
+            let responseData = '';
+            
+            res.on('data', (chunk) => {
+                responseData += chunk;
+            });
+            
+            res.on('end', () => {
+                if (res.statusCode === 202) {
+                    resolve({
+                        messageId: res.headers['x-message-id'] || 'sendgrid-success',
+                        response: 'Email sent successfully via SendGrid HTTP API',
+                        statusCode: res.statusCode
+                    });
+                } else {
+                    reject(new Error(`SendGrid API error: ${res.statusCode} - ${responseData}`));
+                }
+            });
+        });
+        
+        req.on('error', (error) => {
+            reject(error);
+        });
+        
+        req.on('timeout', () => {
+            req.destroy();
+            reject(new Error('SendGrid API request timeout'));
+        });
+        
+        req.setTimeout(10000); // 10 second timeout
+        req.write(emailData);
+        req.end();
+    });
+};
+
 // Email template function
 const createEmailTemplate = (formData) => {
     return `
@@ -146,10 +216,11 @@ app.post('/api/contact', async (req, res) => {
     console.log('\n📨 Contact form submission received:');
     console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
     console.log('📥 Request headers:', req.headers);
-    console.log('🔧 Environment variables check:');
-    console.log('   EMAIL_USER:', process.env.EMAIL_USER ? '✅ Set' : '❌ Missing');
-    console.log('   EMAIL_PASS:', process.env.EMAIL_PASS ? '✅ Set' : '❌ Missing');
-    console.log('   RECIPIENT_EMAIL:', process.env.RECIPIENT_EMAIL ? '✅ Set' : '❌ Missing');
+    console.log('\n🔧 Environment variables check:');
+    console.log('   EMAIL_USER:', process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : '❌ Missing');
+    console.log('   EMAIL_PASS:', process.env.EMAIL_PASS ? `✅ Set (length: ${process.env.EMAIL_PASS.length})` : '❌ Missing');
+    console.log('   RECIPIENT_EMAIL:', process.env.RECIPIENT_EMAIL ? `✅ ${process.env.RECIPIENT_EMAIL}` : '❌ Missing');
+    console.log('   SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? `✅ Set (length: ${process.env.SENDGRID_API_KEY.length})` : '❌ Not configured');
     
     // Extract and validate data first
     const { name, email, phone, message } = req.body;
@@ -191,7 +262,27 @@ app.post('/api/contact', async (req, res) => {
             replyTo: formData.email
         };
         
-        // Try multiple SMTP providers with timeout
+        // FIRST: Try SendGrid HTTP API (bypasses SMTP blockage)
+        console.log('\n🚀 TRYING SENDGRID HTTP API (BYPASS SMTP)...');
+        try {
+            const result = await sendEmailViaSendGrid(formData, mailOptions);
+            console.log(`\n🎉 SUCCESS! Email sent via SendGrid HTTP API`);
+            console.log(`📧 Status Code: ${result.statusCode}`);
+            console.log(`📨 Response: ${result.response}`);
+            
+            return res.status(200).json({
+                success: true,
+                message: 'Message envoyé avec succès! Nous vous répondrons dans les plus brefs délais.',
+                messageId: result.messageId,
+                provider: 'sendgrid_http_api'
+            });
+        } catch (sendgridError) {
+            console.log(`\n❌ SendGrid HTTP API FAILED`);
+            console.log(`   Error: ${sendgridError.message}`);
+        }
+        
+        // FALLBACK: Try SMTP providers (likely to fail due to Render.com blocking)
+        console.log('\n📧 Falling back to SMTP providers...');
         const providers = ['gmail', 'gmail_ssl', 'sendgrid', 'mailgun'];
         let lastError = null;
         let successfulProvider = null;
@@ -242,6 +333,32 @@ app.post('/api/contact', async (req, res) => {
                 console.log(`\n❌ ${provider} FAILED`);
                 console.log(`   Error: ${providerError.message}`);
                 console.log(`   Code: ${providerError.code || 'N/A'}`);
+                console.log(`   Command: ${providerError.command || 'N/A'}`);
+                console.log(`   Response: ${providerError.response || 'N/A'}`);
+                console.log(`   ResponseCode: ${providerError.responseCode || 'N/A'}`);
+                
+                // Gmail-specific diagnostics
+                if (provider.includes('gmail')) {
+                    console.log('\n🔍 Gmail Diagnostics:');
+                    if (providerError.code === 'ETIMEDOUT') {
+                        console.log('   ⚠️  Network timeout - Cannot reach Gmail SMTP servers');
+                        console.log('   💡 Possible causes:');
+                        console.log('      1. Firewall blocking outgoing SMTP connections');
+                        console.log('      2. Network routing issues');
+                        console.log('      3. ISP blocking SMTP ports');
+                    } else if (providerError.code === 'EAUTH' || providerError.responseCode === 535) {
+                        console.log('   ⚠️  Authentication failed');
+                        console.log('   💡 Check:');
+                        console.log('      1. Using App Password (not regular password)?');
+                        console.log('      2. 2FA enabled on Gmail account?');
+                        console.log('      3. App Password not expired/revoked?');
+                        console.log('      4. "Less secure app access" disabled (use App Password)?');
+                    } else if (providerError.code === 'ECONNECTION') {
+                        console.log('   ⚠️  Connection refused');
+                        console.log('   💡 Gmail SMTP might be temporarily unavailable');
+                    }
+                }
+                
                 lastError = providerError;
                 continue;
             }
