@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Video Action Buttons Functionality (for conciergerie page)
     initializeVideoButtons();
+    
+    // Photos Carousel Functionality (for realisations page)
+    initializePhotosCarousel();
     // Add smooth scrolling to navigation links
     const navLinks = document.querySelectorAll('.nav-link, .footer-nav-link');
     navLinks.forEach(link => {
@@ -1037,4 +1040,52 @@ function updateContactContent(language) {
 
 function showLanguageNotification(message) {
     showNotification(message);
+}
+
+// Photos Carousel Functionality
+function initializePhotosCarousel() {
+    const photosGrid = document.querySelector('.photos-grid');
+    const prevBtn = document.querySelector('.carousel-prev');
+    const nextBtn = document.querySelector('.carousel-next');
+    const indicators = document.querySelectorAll('.indicator');
+    
+    if (!photosGrid || !prevBtn || !nextBtn) return;
+    
+    let currentSet = 0;
+    const totalSets = 2; // 2 sets of 3 photos each
+    
+    function updateCarousel() {
+        const translateX = -currentSet * 50; // 50% for each set (since we have 2 sets)
+        photosGrid.style.transform = `translateX(${translateX}%)`;
+        
+        // Update indicators
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentSet);
+        });
+    }
+    
+    function nextSet() {
+        currentSet = (currentSet + 1) % totalSets;
+        updateCarousel();
+    }
+    
+    function prevSet() {
+        currentSet = (currentSet - 1 + totalSets) % totalSets;
+        updateCarousel();
+    }
+    
+    // Event listeners
+    nextBtn.addEventListener('click', nextSet);
+    prevBtn.addEventListener('click', prevSet);
+    
+    // Indicator clicks
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+            currentSet = index;
+            updateCarousel();
+        });
+    });
+    
+    // Initialize
+    updateCarousel();
 }

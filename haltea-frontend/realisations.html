@@ -67,15 +67,50 @@
 
             <!-- Photos Section -->
             <div class="photos-section">
-                <div class="photos-grid">
-                    <div class="photo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.22.09_1ae2455c_nhy8rt.jpg" alt="Réalisation 1" class="realisation-photo">
+                <div class="photos-carousel">
+                    <!-- Photos Container -->
+                    <div class="photos-container">
+                        <div class="photos-grid">
+                            <!-- First set of 3 photos -->
+                            <div class="photo-item">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.22.09_1ae2455c_nhy8rt.jpg" alt="Réalisation 1" class="realisation-photo">
+                            </div>
+                            <div class="photo-item">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_49a8b4c6_otwae0.jpg" alt="Réalisation 2" class="realisation-photo">
+                            </div>
+                            <div class="photo-item">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_5d0c547e_qxwewu.jpg" alt="Réalisation 3" class="realisation-photo">
+                            </div>
+                            
+                            <!-- Second set of 3 photos -->
+                            <div class="photo-item">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099293/IMG_0296_m7rlei.jpg" alt="Réalisation 4" class="realisation-photo">
+                            </div>
+                            <div class="photo-item">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099296/IMG_2461_p7fnwi.jpg" alt="Réalisation 5" class="realisation-photo">
+                            </div>
+                            <div class="photo-item">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099290/f2e008b3-30cf-401d-ba9b-709b4fb400c5_ym1cpc.jpg" alt="Réalisation 6" class="realisation-photo">
+                            </div>
+                        </div>
                     </div>
-                    <div class="photo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_49a8b4c6_otwae0.jpg" alt="Réalisation 2" class="realisation-photo">
+                </div>
+                
+                <!-- Carousel Indicators with Navigation Arrows -->
+                <div class="carousel-indicators">
+                    <div class="carousel-nav carousel-prev">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M15 18L9 12L15 6" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </div>
-                    <div class="photo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_5d0c547e_qxwewu.jpg" alt="Réalisation 3" class="realisation-photo">
+                    
+                    <span class="indicator active" data-set="0"></span>
+                    <span class="indicator" data-set="1"></span>
+                    
+                    <div class="carousel-nav carousel-next">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 18L15 12L9 6" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                     </div>
                 </div>
             </div>
