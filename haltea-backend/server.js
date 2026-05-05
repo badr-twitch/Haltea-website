@@ -175,7 +175,13 @@ const sendEmailViaSendGrid = (formData, mailOptions) => {
 
 // Email template function
 const createEmailTemplate = (formData) => {
-    return `
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouveau message — HALTÉA</title>
+</head>
+<body style="margin:0;background-color:#f9f9f9;">
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
         <div style="background: #000000; padding: 30px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
             <h2 style="color: #D4AF37; text-align: center; margin-bottom: 30px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px;">
@@ -208,7 +214,8 @@ const createEmailTemplate = (formData) => {
             </div>
         </div>
     </div>
-    `;
+</body>
+</html>`;
 };
 
 // Contact form endpoint

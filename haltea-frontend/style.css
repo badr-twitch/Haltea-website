@@ -4238,3 +4238,14 @@ html {
     border-color: #f44336;
 }
 
+/* Logo as home link — strip default anchor styling */
+a.logo {
+    text-decoration: none;
+    color: inherit;
+}
+a.logo:focus-visible {
+    outline: 2px solid #D4AF37;
+    outline-offset: 4px;
+    border-radius: 50%;
+}
+

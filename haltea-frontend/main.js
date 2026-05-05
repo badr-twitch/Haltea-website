@@ -178,39 +178,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitButton = document.querySelector('.submit-button-3d');
     
     if (contactForm && submitButton) {
-        // Validation rules
-        const validationRules = {
-            civilite: {
-                required: true,
-                message: 'Veuillez sélectionner votre civilité'
+        // Validation rules — error messages localized via getMessage()
+        const errorMessages = {
+            fr: {
+                civilite: 'Veuillez sélectionner votre civilité',
+                nom: 'Le nom doit contenir entre 2 et 50 caractères (lettres uniquement)',
+                email: 'Veuillez entrer une adresse email valide',
+                telephone: 'Format valide : 06 12 34 56 78 ou +33 6 12 34 56 78',
+                message: 'Le message doit contenir entre 10 et 1000 caractères',
+                consent: 'Vous devez accepter la politique de confidentialité'
             },
+            en: {
+                civilite: 'Please select a title',
+                nom: 'Name must be 2 to 50 characters (letters only)',
+                email: 'Please enter a valid email address',
+                telephone: 'Valid format: 06 12 34 56 78 or +33 6 12 34 56 78',
+                message: 'Message must be between 10 and 1000 characters',
+                consent: 'You must accept the privacy policy'
+            }
+        };
+        function getMessage(field) {
+            const lang = currentLanguage === 'en' ? 'en' : 'fr';
+            return (errorMessages[lang] && errorMessages[lang][field]) || errorMessages.fr[field];
+        }
+        const validationRules = {
+            civilite: { required: true, get message() { return getMessage('civilite'); } },
             nom: {
                 required: true,
                 minLength: 2,
                 maxLength: 50,
                 pattern: /^[a-zA-ZÀ-ÿ\s\-']+$/,
-                message: 'Le nom doit contenir entre 2 et 50 caractères (lettres uniquement)'
+                get message() { return getMessage('nom'); }
             },
             email: {
                 required: true,
                 pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Veuillez entrer une adresse email valide'
+                get message() { return getMessage('email'); }
             },
             telephone: {
                 required: true,
                 pattern: /^(?:\+33\s?[1-9](?:\s?\d{2}){4}|0[1-9](?:\s?\d{2}){4})$/,
-                message: 'Format valide : 06 12 34 56 78 ou +33 6 12 34 56 78'
+                get message() { return getMessage('telephone'); }
             },
             message: {
                 required: true,
                 minLength: 10,
                 maxLength: 1000,
-                message: 'Le message doit contenir entre 10 et 1000 caractères'
+                get message() { return getMessage('message'); }
             },
-            consent: {
-                required: true,
-                message: 'Vous devez accepter la politique de confidentialité'
-            }
+            consent: { required: true, get message() { return getMessage('consent'); } }
         };
 
         // Create error message element
@@ -591,9 +607,10 @@ function initializeVideoButtons() {
     const watchBtn = document.querySelector('.watch-btn');
     if (watchBtn) {
         watchBtn.addEventListener('click', function() {
-            // Redirect directly to YouTube video
+            // Redirect directly to YouTube video — noopener for security; user is
+            // pre-warned via the button's aria-label that it opens in a new tab.
             const youtubeUrl = 'https://youtu.be/0tTHfQWIiUA';
-            window.open(youtubeUrl, '_blank');
+            window.open(youtubeUrl, '_blank', 'noopener,noreferrer');
         });
     }
 
