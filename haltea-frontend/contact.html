@@ -151,6 +151,14 @@
                                 </label>
                             </div>
 
+                            <!-- Honeypot — hidden from real users (offscreen + aria-hidden + tabindex=-1).
+                                 Bots fill every text input; if this is non-empty server-side, the
+                                 submission is silently dropped. Do not remove. -->
+                            <div class="hp-field" aria-hidden="true">
+                                <label for="website">Site web (laissez vide)</label>
+                                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                            </div>
+
                             <!-- Submit Button -->
                             <button type="submit" class="submit-button-3d">
                                 <span class="button-text" data-translate="form_send">ENVOYER</span>

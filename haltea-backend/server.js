@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
@@ -9,15 +10,49 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Trust the first proxy hop (Render, Heroku, etc.) so rate-limit reads the real client IP
+app.set('trust proxy', 1);
+
+// CORS allowlist — configurable via ALLOWED_ORIGINS env (comma-separated).
+// Same-origin requests have no Origin header and are allowed.
+const allowedOrigins = (process.env.ALLOWED_ORIGINS ||
+    'https://haltea-server.onrender.com,http://localhost:3001')
+    .split(',').map(o => o.trim()).filter(Boolean);
+
 app.use(cors({
-    origin: true, // Allow all origins for development
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: (origin, cb) => {
+        if (!origin) return cb(null, true);
+        if (allowedOrigins.includes(origin)) return cb(null, true);
+        console.warn(`⛔ CORS blocked origin: ${origin}`);
+        return cb(new Error('Origin not allowed by CORS'));
+    },
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type']
 }));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Tighter body-size limits — a contact form does not need 10 MB
+app.use(express.json({ limit: '64kb' }));
+app.use(express.urlencoded({ extended: true, limit: '64kb' }));
+
+// Rate limiter for the contact endpoint: 5 submissions per 10 minutes per IP
+const contactLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        success: false,
+        message: 'Trop de requêtes envoyées. Veuillez réessayer dans quelques minutes.'
+    }
+});
+
+// HTML-escape user-supplied strings before interpolating into the email template
+const escapeHtml = (value) => String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
 // Serve static files from frontend
 app.use(express.static(path.join(__dirname, '../haltea-frontend')));
@@ -190,21 +225,21 @@ const createEmailTemplate = (formData) => {
             
             <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 18px;">Informations du Client</h3>
-                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Nom:</strong> ${formData.name}</p>
-                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Email:</strong> ${formData.email}</p>
-                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Téléphone:</strong> ${formData.phone || 'Non fourni'}</p>
+                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Nom:</strong> ${escapeHtml(formData.name)}</p>
+                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Email:</strong> ${escapeHtml(formData.email)}</p>
+                <p style="color: white; margin: 8px 0; font-size: 16px;"><strong style="color: #D4AF37; font-weight: bold;">Téléphone:</strong> ${escapeHtml(formData.phone || 'Non fourni')}</p>
             </div>
             
             <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                 <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 18px;">Message</h3>
-                <p style="color: white; line-height: 1.6; white-space: pre-wrap; font-size: 16px; margin: 0;">${formData.message}</p>
+                <p style="color: white; line-height: 1.6; white-space: pre-wrap; font-size: 16px; margin: 0;">${escapeHtml(formData.message)}</p>
             </div>
             
             <div style="background-color: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
                 <h3 style="color: #D4AF37; margin-bottom: 15px; font-size: 18px;">Détails Techniques</h3>
                 <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">Date:</strong> ${new Date().toLocaleString('fr-FR')}</p>
-                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">IP:</strong> ${formData.clientIP}</p>
-                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">User Agent:</strong> ${formData.userAgent}</p>
+                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">IP:</strong> ${escapeHtml(formData.clientIP)}</p>
+                <p style="color: white; margin: 5px 0; font-size: 14px;"><strong style="color: #D4AF37; font-weight: bold;">User Agent:</strong> ${escapeHtml(formData.userAgent)}</p>
             </div>
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
@@ -219,10 +254,31 @@ const createEmailTemplate = (formData) => {
 };
 
 // Contact form endpoint
-app.post('/api/contact', async (req, res) => {
+app.post('/api/contact', contactLimiter, async (req, res) => {
     console.log('\n📨 Contact form submission received:');
-    console.log('📥 Request body:', JSON.stringify(req.body, null, 2));
-    console.log('📥 Request headers:', req.headers);
+    // NOTE: do not log full headers (contains IP, UA, cookies) — log only what we need.
+    console.log('📥 Request body keys:', Object.keys(req.body || {}));
+
+    // Honeypot — bots typically fill every text input. Real users never see this field.
+    // If "website" is non-empty, silently pretend success and drop the message.
+    if (req.body && typeof req.body.website === 'string' && req.body.website.trim() !== '') {
+        console.log('🍯 Honeypot triggered — dropping silently. Value:', req.body.website.slice(0, 50));
+        return res.status(200).json({
+            success: true,
+            message: 'Message reçu! Nous vous contacterons dans les plus brefs délais.'
+        });
+    }
+
+    // Per-field length caps (defence in depth — body limit is already 64kb)
+    const MAX_NAME = 100;
+    const MAX_EMAIL = 254;
+    const MAX_PHONE = 30;
+    const MAX_MESSAGE = 2000;
+    const tooLong = (s, max) => typeof s === 'string' && s.length > max;
+    if (tooLong(req.body.name, MAX_NAME) || tooLong(req.body.email, MAX_EMAIL) ||
+        tooLong(req.body.phone, MAX_PHONE) || tooLong(req.body.message, MAX_MESSAGE)) {
+        return res.status(400).json({ success: false, message: 'Champ trop long.' });
+    }
     console.log('\n🔧 Environment variables check:');
     console.log('   EMAIL_USER:', process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : '❌ Missing');
     console.log('   EMAIL_PASS:', process.env.EMAIL_PASS ? `✅ Set (length: ${process.env.EMAIL_PASS.length})` : '❌ Missing');

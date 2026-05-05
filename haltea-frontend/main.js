@@ -417,12 +417,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.log('✅ Validation passed');
                     console.log('📤 Sending request to:', 'https://haltea-server.onrender.com/api/contact');
                     
-                    // Transform form data to match backend API expectations
+                    // Transform form data to match backend API expectations.
+                    // The honeypot value is forwarded so the backend can drop bot submissions.
+                    const honeypotEl = contactForm.querySelector('input[name="website"]');
                     const apiData = {
                         name: formData.nom,
                         email: formData.email,
                         phone: formData.telephone,
-                        message: formData.message
+                        message: formData.message,
+                        website: honeypotEl ? honeypotEl.value : ''
                     };
                     
                     console.log('📤 Sending API data:', apiData);

@@ -4238,6 +4238,18 @@ html {
     border-color: #f44336;
 }
 
+/* Honeypot anti-bot field — hidden from sighted users and assistive tech.
+   `display: none` and `visibility: hidden` are NOT used because some bots
+   skip those; instead, take the field offscreen so layout/AT both ignore it. */
+.hp-field {
+    position: absolute !important;
+    left: -10000px !important;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
 /* Logo as home link — strip default anchor styling */
 a.logo {
     text-decoration: none;
