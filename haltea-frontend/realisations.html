@@ -10,15 +10,20 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <a class="skip-link" href="#main">Aller au contenu principal</a>
     <!-- Header -->
     <header class="header">
         <div class="header-container">
             <!-- Top Row: Flags, Logo, Notification -->
             <div class="header-top">
                 <!-- Language Flags -->
-                <div class="language-flags">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjRkZGRkZGIi8+CjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDAyMzk1Ii8+CjxyZWN0IHg9IjE2IiB3aWR0aD0iOCIgaGVpZ2h0PSIxOCIgZmlsbD0iI0VEMjEyMiIvPgo8L3N2Zz4K" alt="French Flag" class="flag">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIj48dGl0bGU+RmxhZyBvZiB0aGUgVW5pdGVkIEtpbmdkb208L3RpdGxlPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcCI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIi8+PC9jbGlwUGF0aD48L2RlZnM+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDEyMTY5Ii8+PGcgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjYiPjxwYXRoIGQ9Ik0wIDAgTDYwIDMwIi8+PHBhdGggZD0iTTYwIDAgTDAgMzAiLz48L2c+PGcgc3Ryb2tlPSIjQzgxMDJFIiBzdHJva2Utd2lkdGg9IjQiIGNsaXAtcGF0aD0idXJsKCNjbGlwKSI+PHBhdGggZD0iTTAgMCBMNjAgMzAiLz48cGF0aCBkPSJNNjAgMCBMMCAzMCIvPjwvZz48cmVjdCB4PSIyNSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZmZmIi8+PHJlY3QgeT0iMTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjI3IiB3aWR0aD0iNiIgaGVpZ2h0PSIzMCIgZmlsbD0iI0M4MTAyRSIvPjxyZWN0IHk9IjEyIiB3aWR0aD0iNjAiIGhlaWdodD0iNiIgZmlsbD0iI0M4MTAyRSIvPjwvc3ZnPg==" alt="UK Flag" class="flag">
+                <div class="language-flags" role="group" aria-label="Sélection de la langue">
+                    <button type="button" class="flag-button" data-lang="fr" lang="fr" aria-label="Passer en français" aria-pressed="true">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjRkZGRkZGIi8+CjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDAyMzk1Ii8+CjxyZWN0IHg9IjE2IiB3aWR0aD0iOCIgaGVpZ2h0PSIxOCIgZmlsbD0iI0VEMjEyMiIvPgo8L3N2Zz4K" alt="" aria-hidden="true" class="flag">
+                    </button>
+                    <button type="button" class="flag-button" data-lang="en" lang="en" aria-label="Switch to English" aria-pressed="false">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIj48dGl0bGU+RmxhZyBvZiB0aGUgVW5pdGVkIEtpbmdkb208L3RpdGxlPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcCI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIi8+PC9jbGlwUGF0aD48L2RlZnM+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDEyMTY5Ii8+PGcgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjYiPjxwYXRoIGQ9Ik0wIDAgTDYwIDMwIi8+PHBhdGggZD0iTTYwIDAgTDAgMzAiLz48L2c+PGcgc3Ryb2tlPSIjQzgxMDJFIiBzdHJva2Utd2lkdGg9IjQiIGNsaXAtcGF0aD0idXJsKCNjbGlwKSI+PHBhdGggZD0iTTAgMCBMNjAgMzAiLz48cGF0aCBkPSJNNjAgMCBMMCAzMCIvPjwvZz48cmVjdCB4PSIyNSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZmZmIi8+PHJlY3QgeT0iMTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjI3IiB3aWR0aD0iNiIgaGVpZ2h0PSIzMCIgZmlsbD0iI0M4MTAyRSIvPjxyZWN0IHk9IjEyIiB3aWR0aD0iNjAiIGhlaWdodD0iNiIgZmlsbD0iI0M4MTAyRSIvPjwvc3ZnPg==" alt="" aria-hidden="true" class="flag">
+                    </button>
                 </div>
 
                 <!-- Logo -->
@@ -29,11 +34,11 @@
                 </div>
 
                 <!-- Notification Bell -->
-                <div class="notification">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <button type="button" class="notification" aria-label="Notifications">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                         <path d="M12 2C13.1 2 14 2.9 14 4C14 4.74 13.6 5.39 13 5.73V7H14C17.31 7 20 9.69 20 13V16L22 18V19H2V18L4 16V13C4 9.69 6.69 7 10 7H11V5.73C10.4 5.39 10 4.74 10 4C10 2.9 10.9 2 12 2ZM12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z" fill="#D4AF37"/>
                     </svg>
-                </div>
+                </button>
             </div>
 
             <!-- Bottom Row: Navigation -->
@@ -50,7 +55,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="realisations-main">
+    <main class="realisations-main" id="main">
         <div class="realisations-container">
             <!-- Page Header -->
             <div class="realisations-header">
@@ -73,84 +78,84 @@
                         <div class="photos-grid">
                             <!-- First set of 3 photos -->
                             <div class="photo-item">
-                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.22.09_1ae2455c_nhy8rt.jpg" alt="Réalisation 1" class="realisation-photo">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.22.09_1ae2455c_nhy8rt.jpg" class="realisation-photo" alt="" aria-hidden="true">
                             </div>
                             <div class="photo-item">
-                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_49a8b4c6_otwae0.jpg" alt="Réalisation 2" class="realisation-photo">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_49a8b4c6_otwae0.jpg" class="realisation-photo" alt="" aria-hidden="true">
                             </div>
                             <div class="photo-item">
-                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_5d0c547e_qxwewu.jpg" alt="Réalisation 3" class="realisation-photo">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759304425/WhatsApp_Image_2025-09-20_at_17.21.57_5d0c547e_qxwewu.jpg" class="realisation-photo" alt="" aria-hidden="true">
                             </div>
                             
                             <!-- Second set of 3 photos -->
                             <div class="photo-item">
-                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099293/IMG_0296_m7rlei.jpg" alt="Réalisation 4" class="realisation-photo">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099293/IMG_0296_m7rlei.jpg" class="realisation-photo" alt="" aria-hidden="true">
                             </div>
                             <div class="photo-item">
-                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099296/IMG_2461_p7fnwi.jpg" alt="Réalisation 5" class="realisation-photo">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099296/IMG_2461_p7fnwi.jpg" class="realisation-photo" alt="" aria-hidden="true">
                             </div>
                             <div class="photo-item">
-                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099290/f2e008b3-30cf-401d-ba9b-709b4fb400c5_ym1cpc.jpg" alt="Réalisation 6" class="realisation-photo">
+                                <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_600,h_400,c_fill,q_100,f_auto,dpr_auto,fl_progressive:steep/v1760099290/f2e008b3-30cf-401d-ba9b-709b4fb400c5_ym1cpc.jpg" class="realisation-photo" alt="" aria-hidden="true">
                             </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Carousel Indicators with Navigation Arrows -->
-                <div class="carousel-indicators">
-                    <div class="carousel-nav carousel-prev">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <div class="carousel-indicators" role="group" aria-label="Navigation du carrousel">
+                    <button type="button" class="carousel-nav carousel-prev" aria-label="Photos précédentes">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                             <path d="M15 18L9 12L15 6" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                    </div>
-                    
-                    <span class="indicator active" data-set="0"></span>
-                    <span class="indicator" data-set="1"></span>
-                    
-                    <div class="carousel-nav carousel-next">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    </button>
+
+                    <button type="button" class="indicator active" data-set="0" aria-label="Diapositive 1 sur 2" aria-current="true"></button>
+                    <button type="button" class="indicator" data-set="1" aria-label="Diapositive 2 sur 2"></button>
+
+                    <button type="button" class="carousel-nav carousel-next" aria-label="Photos suivantes">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
                             <path d="M9 18L15 12L9 6" stroke="#D4AF37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
-                    </div>
+                    </button>
                 </div>
             </div>
 
             <!-- Keyphrases Section -->
             <div class="keyphrases-section">
-                <div class="keyphrases-grid">
-                    <div class="keyphrase-item">
+                <ul class="keyphrases-grid">
+                    <li class="keyphrase-item">
                         <div class="checkmark-icon">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
                                 <path d="M16.67 5.5l-7.17 7.17-3.33-3.33L4.5 11l5 5 8.5-8.5z" fill="#FFD700"/>
                             </svg>
                         </div>
                         <span class="keyphrase-text" data-translate="keyphrase_1">Protocolé & acceuil officiel</span>
-                    </div>
-                    <div class="keyphrase-item">
+                    </li>
+                    <li class="keyphrase-item">
                         <div class="checkmark-icon">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
                                 <path d="M16.67 5.5l-7.17 7.17-3.33-3.33L4.5 11l5 5 8.5-8.5z" fill="#FFD700"/>
                             </svg>
                         </div>
                         <span class="keyphrase-text" data-translate="keyphrase_2">Ultra VIP & Personnalisé</span>
-                    </div>
-                    <div class="keyphrase-item">
+                    </li>
+                    <li class="keyphrase-item">
                         <div class="checkmark-icon">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
                                 <path d="M16.67 5.5l-7.17 7.17-3.33-3.33L4.5 11l5 5 8.5-8.5z" fill="#FFD700"/>
                             </svg>
                         </div>
                         <span class="keyphrase-text" data-translate="keyphrase_3">Délégation internationale</span>
-                    </div>
-                    <div class="keyphrase-item">
+                    </li>
+                    <li class="keyphrase-item">
                         <div class="checkmark-icon">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
                                 <path d="M16.67 5.5l-7.17 7.17-3.33-3.33L4.5 11l5 5 8.5-8.5z" fill="#FFD700"/>
                             </svg>
                         </div>
                         <span class="keyphrase-text" data-translate="keyphrase_4">Coordination diplomatique & institutionnelle</span>
-                    </div>
-                </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </main>
@@ -178,8 +183,8 @@
             </nav>
 
             <!-- Icon -->
-            <div class="footer-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="footer-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <rect x="3" y="3" width="18" height="18" rx="2" stroke="#D4AF37" stroke-width="2"/>
                     <rect x="7" y="7" width="10" height="10" rx="1" stroke="#D4AF37" stroke-width="2"/>
                 </svg>
@@ -187,6 +192,7 @@
         </div>
     </footer>
 
+    <div id="a11y-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     <script src="main.js"></script>
 </body>
 </html>

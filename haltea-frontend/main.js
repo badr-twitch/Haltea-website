@@ -57,8 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
             header.style.backdropFilter = 'blur(10px)';
         }
 
-        // Hide/show header on scroll
-        if (currentScrollY > lastScrollY && currentScrollY > 200) {
+        // Hide/show header on scroll — but never while focus is inside the header
+        // (WCAG 2.4.11 Focus Not Obscured)
+        const focusInsideHeader = header.contains(document.activeElement);
+        if (!focusInsideHeader && currentScrollY > lastScrollY && currentScrollY > 200) {
             header.style.transform = 'translateY(-100%)';
         } else {
             header.style.transform = 'translateY(0)';
@@ -103,16 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Language flag switching
-    const flags = document.querySelectorAll('.flag');
-    flags.forEach(flag => {
-        flag.addEventListener('click', function() {
-            // Remove active class from all flags
-            flags.forEach(f => f.classList.remove('active'));
-            // Add active class to clicked flag
-            this.classList.add('active');
-        });
-    });
+    // Language flag switching is initialized via initializeLanguageSwitching()
+    // and aria-pressed state is synced in updateFlagPressed().
 
     // Notification bell animation
     const notification = document.querySelector('.notification');
@@ -234,13 +228,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 existingError.remove();
             }
             field.classList.remove('error');
+            field.removeAttribute('aria-invalid');
+            field.removeAttribute('aria-describedby');
         }
 
-        // Show error message
+        // Show error message — wired with aria-describedby + aria-invalid for screen readers
         function showError(field, message) {
             removeErrorMessages(field);
             field.classList.add('error');
+            field.setAttribute('aria-invalid', 'true');
             const errorMessage = createErrorMessage(message);
+            const errorId = `${field.id || field.name}-error`;
+            errorMessage.id = errorId;
+            errorMessage.setAttribute('role', 'alert');
+            field.setAttribute('aria-describedby', errorId);
             field.parentElement.appendChild(errorMessage);
         }
 
@@ -335,9 +336,11 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Form submission with validation
-        submitButton.addEventListener('click', async function(e) {
+        // Form submission with validation — bound to the form's submit event
+        // so Enter-key submission also goes through validation (WCAG 2.1.1).
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            const submitBtn = submitButton;
             
             let isValid = true;
             const formData = {};
@@ -363,52 +366,35 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (isValid) {
                 // Show loading state
-                const originalText = this.querySelector('.button-text').textContent;
-                this.querySelector('.button-text').textContent = 'ENVOI EN COURS...';
-                this.disabled = true;
-                this.style.opacity = '0.7';
-
-                // Create ripple effect
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-                
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-                ripple.classList.add('ripple');
-                
-                this.appendChild(ripple);
-                
-                setTimeout(() => {
-                    ripple.remove();
-                }, 600);
+                const originalText = submitBtn.querySelector('.button-text').textContent;
+                submitBtn.querySelector('.button-text').textContent = 'ENVOI EN COURS...';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
+                announce('Envoi du message en cours...');
 
                 // Handle contact form submission
                 try {
                     console.log('🚀 Form submission started');
                     console.log('📝 Form data:', formData);
-                    
+
                     // Validate required fields
                     if (!formData.nom || !formData.email || !formData.message) {
                         console.log('❌ Validation failed - missing required fields');
                         showGeneralError();
-                        this.querySelector('.button-text').textContent = originalText;
-                        this.disabled = false;
-                        this.style.opacity = '1';
+                        submitBtn.querySelector('.button-text').textContent = originalText;
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
                         return;
                     }
-                    
+
                     // Check consent checkbox
                     const consentCheckbox = document.querySelector('input[name="consent"]');
                     if (!consentCheckbox || !consentCheckbox.checked) {
                         console.log('❌ Validation failed - consent not checked');
                         showGeneralError();
-                        this.querySelector('.button-text').textContent = originalText;
-                        this.disabled = false;
-                        this.style.opacity = '1';
+                        submitBtn.querySelector('.button-text').textContent = originalText;
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
                         return;
                     }
                     
@@ -451,9 +437,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     showGeneralError();
                 } finally {
                     // Reset button
-                    this.querySelector('.button-text').textContent = originalText;
-                    this.disabled = false;
-                    this.style.opacity = '1';
+                    submitBtn.querySelector('.button-text').textContent = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
                 }
             } else {
                 // Show general error message
@@ -468,6 +454,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const successDiv = document.createElement('div');
             successDiv.className = 'form-message success';
+            successDiv.setAttribute('role', 'status');
+            successDiv.setAttribute('aria-live', 'polite');
             successDiv.innerHTML = `
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M9 12L11 14L15 10" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -477,7 +465,8 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             contactForm.insertBefore(successDiv, contactForm.firstChild);
-            
+            announce('Message envoyé avec succès. Nous vous répondrons dans les plus brefs délais.');
+
             setTimeout(() => {
                 successDiv.remove();
             }, 5000);
@@ -490,17 +479,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const errorDiv = document.createElement('div');
             errorDiv.className = 'form-message error';
+            errorDiv.setAttribute('role', 'alert');
             errorDiv.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <circle cx="12" cy="12" r="10" stroke="#f44336" stroke-width="2"/>
                     <line x1="15" y1="9" x2="9" y2="15" stroke="#f44336" stroke-width="2"/>
                     <line x1="9" y1="9" x2="15" y2="15" stroke="#f44336" stroke-width="2"/>
                 </svg>
                 <span>Veuillez corriger les erreurs dans le formulaire.</span>
             `;
-            
+
             contactForm.insertBefore(errorDiv, contactForm.firstChild);
-            
+            announce('Veuillez corriger les erreurs dans le formulaire.', true);
+
             setTimeout(() => {
                 errorDiv.remove();
             }, 5000);
@@ -516,18 +507,8 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(el);
     });
 
-    // Language flag switching for contact page
-    const flagButtons = document.querySelectorAll('.flag-btn');
-    flagButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            flagButtons.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Language switching logic would go here
-            const lang = this.dataset.lang;
-            console.log('Language switched to:', lang);
-        });
-    });
+    // (legacy .flag-btn duplicate handler removed — language switching is centralised
+    //  in initializeLanguageSwitching() against the .flag-button elements.)
 
     // Notification icon animation for contact page
     const notificationIcon = document.querySelector('.notification-icon');
@@ -645,8 +626,11 @@ function initializeVideoButtons() {
 
     // Helper function to show notifications
     function showNotification(message) {
+        announce(message);
         // Create notification element
         const notification = document.createElement('div');
+        notification.setAttribute('role', 'status');
+        notification.setAttribute('aria-live', 'polite');
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -695,23 +679,34 @@ function initializeVideoButtons() {
 
 // Language Switching Functionality
 function initializeLanguageSwitching() {
-    // Get French flag elements
-    const frenchFlags = document.querySelectorAll('.flag[alt="French Flag"]');
-    const ukFlags = document.querySelectorAll('.flag[alt="UK Flag"]');
-    
-    // French flag click handler
-    frenchFlags.forEach(flag => {
-        flag.addEventListener('click', function() {
-            switchToFrench();
+    const flagButtons = document.querySelectorAll('.flag-button');
+    flagButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const lang = this.dataset.lang;
+            if (lang === 'en') switchToEnglish();
+            else switchToFrench();
         });
     });
-    
-    // UK flag click handler
-    ukFlags.forEach(flag => {
-        flag.addEventListener('click', function() {
-            switchToEnglish();
-        });
+    // Sync initial pressed state with currentLanguage
+    updateFlagPressed(currentLanguage);
+    // Set initial document lang
+    document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'fr';
+}
+
+function updateFlagPressed(lang) {
+    document.querySelectorAll('.flag-button').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.dataset.lang === lang ? 'true' : 'false');
     });
+}
+
+// Live region announcement helper
+function announce(message, assertive = false) {
+    const live = document.getElementById('a11y-live');
+    if (!live) return;
+    live.setAttribute('aria-live', assertive ? 'assertive' : 'polite');
+    live.setAttribute('role', assertive ? 'alert' : 'status');
+    live.textContent = '';
+    setTimeout(() => { live.textContent = message; }, 50);
 }
 
 function switchToEnglish() {
@@ -729,16 +724,10 @@ function switchToFrench() {
 }
 
 function applyLanguage(language) {
-    // Update page title
-    const pageTitle = document.querySelector('title');
-    if (pageTitle) {
-        const currentTitle = pageTitle.textContent;
-        if (language === 'en' && currentTitle.includes('HALTÉA')) {
-            pageTitle.textContent = currentTitle.replace('HALTÉA', 'HALTEA');
-        } else if (language === 'fr' && currentTitle.includes('HALTEA')) {
-            pageTitle.textContent = currentTitle.replace('HALTEA', 'HALTÉA');
-        }
-    }
+    // Update document language for assistive technology
+    document.documentElement.lang = language === 'en' ? 'en' : 'fr';
+    // Sync flag pressed state
+    updateFlagPressed(language);
     
             // Translate all elements with data-translate attribute
             const translatableElements = document.querySelectorAll('[data-translate]');
@@ -1057,27 +1046,33 @@ function initializePhotosCarousel() {
     function updateCarousel() {
         const translateX = -currentSet * 50; // 50% for each set (since we have 2 sets)
         photosGrid.style.transform = `translateX(${translateX}%)`;
-        
-        // Update indicators
+
+        // Update indicators - both visual class and aria-current for screen readers
         indicators.forEach((indicator, index) => {
-            indicator.classList.toggle('active', index === currentSet);
+            const isActive = index === currentSet;
+            indicator.classList.toggle('active', isActive);
+            if (isActive) {
+                indicator.setAttribute('aria-current', 'true');
+            } else {
+                indicator.removeAttribute('aria-current');
+            }
         });
     }
-    
+
     function nextSet() {
         currentSet = (currentSet + 1) % totalSets;
         updateCarousel();
     }
-    
+
     function prevSet() {
         currentSet = (currentSet - 1 + totalSets) % totalSets;
         updateCarousel();
     }
-    
+
     // Event listeners
     nextBtn.addEventListener('click', nextSet);
     prevBtn.addEventListener('click', prevSet);
-    
+
     // Indicator clicks
     indicators.forEach((indicator, index) => {
         indicator.addEventListener('click', () => {
@@ -1085,7 +1080,21 @@ function initializePhotosCarousel() {
             updateCarousel();
         });
     });
-    
+
+    // Keyboard support: Arrow Left / Right while focus is inside the carousel
+    const carouselRoot = document.querySelector('.photos-section');
+    if (carouselRoot) {
+        carouselRoot.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                nextSet();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSet();
+            }
+        });
+    }
+
     // Initialize
     updateCarousel();
 }

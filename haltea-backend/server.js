@@ -202,7 +202,7 @@ const createEmailTemplate = (formData) => {
             </div>
             
             <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-                <p style="color: #888; font-size: 12px;">
+                <p style="color: #595959; font-size: 12px;">
                     Message envoyé depuis le site web de la Conciergerie de Luxe
                 </p>
             </div>

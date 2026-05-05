@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accueil Autrement - Services Ultra VIP</title>
+    <title>Accueil — HALTÉA</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
+    <a class="skip-link" href="#main">Aller au contenu principal</a>
     <!-- Header Section -->
     <header class="header">
         <div class="header-container">
             <!-- Top Row: Flags, Logo, Notification -->
             <div class="header-top">
                 <!-- Language Flags -->
-                <div class="language-flags">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjRkZGRkZGIi8+CjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDAyMzk1Ii8+CjxyZWN0IHg9IjE2IiB3aWR0aD0iOCIgaGVpZ2h0PSIxOCIgZmlsbD0iI0VEMjEyMiIvPgo8L3N2Zz4K" alt="French Flag" class="flag">
-                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIj48dGl0bGU+RmxhZyBvZiB0aGUgVW5pdGVkIEtpbmdkb208L3RpdGxlPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcCI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIi8+PC9jbGlwUGF0aD48L2RlZnM+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDEyMTY5Ii8+PGcgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjYiPjxwYXRoIGQ9Ik0wIDAgTDYwIDMwIi8+PHBhdGggZD0iTTYwIDAgTDAgMzAiLz48L2c+PGcgc3Ryb2tlPSIjQzgxMDJFIiBzdHJva2Utd2lkdGg9IjQiIGNsaXAtcGF0aD0idXJsKCNjbGlwKSI+PHBhdGggZD0iTTAgMCBMNjAgMzAiLz48cGF0aCBkPSJNNjAgMCBMMCAzMCIvPjwvZz48cmVjdCB4PSIyNSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZmZmIi8+PHJlY3QgeT0iMTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjI3IiB3aWR0aD0iNiIgaGVpZ2h0PSIzMCIgZmlsbD0iI0M4MTAyRSIvPjxyZWN0IHk9IjEyIiB3aWR0aD0iNjAiIGhlaWdodD0iNiIgZmlsbD0iI0M4MTAyRSIvPjwvc3ZnPg==" alt="UK Flag" class="flag">
+                <div class="language-flags" role="group" aria-label="Sélection de la langue">
+                    <button type="button" class="flag-button" data-lang="fr" lang="fr" aria-label="Passer en français" aria-pressed="true">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjRkZGRkZGIi8+CjxyZWN0IHdpZHRoPSI4IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDAyMzk1Ii8+CjxyZWN0IHg9IjE2IiB3aWR0aD0iOCIgaGVpZ2h0PSIxOCIgZmlsbD0iI0VEMjEyMiIvPgo8L3N2Zz4K" alt="" aria-hidden="true" class="flag">
+                    </button>
+                    <button type="button" class="flag-button" data-lang="en" lang="en" aria-label="Switch to English" aria-pressed="false">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCAzMCIgd2lkdGg9IjEyMDAiIGhlaWdodD0iNjAwIj48dGl0bGU+RmxhZyBvZiB0aGUgVW5pdGVkIEtpbmdkb208L3RpdGxlPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcCI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIi8+PC9jbGlwUGF0aD48L2RlZnM+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMDEyMTY5Ii8+PGcgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjYiPjxwYXRoIGQ9Ik0wIDAgTDYwIDMwIi8+PHBhdGggZD0iTTYwIDAgTDAgMzAiLz48L2c+PGcgc3Ryb2tlPSIjQzgxMDJFIiBzdHJva2Utd2lkdGg9IjQiIGNsaXAtcGF0aD0idXJsKCNjbGlwKSI+PHBhdGggZD0iTTAgMCBMNjAgMzAiLz48cGF0aCBkPSJNNjAgMCBMMCAzMCIvPjwvZz48cmVjdCB4PSIyNSIgd2lkdGg9IjEwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjZmZmIi8+PHJlY3QgeT0iMTAiIHdpZHRoPSI2MCIgaGVpZ2h0PSIxMCIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjI3IiB3aWR0aD0iNiIgaGVpZ2h0PSIzMCIgZmlsbD0iI0M4MTAyRSIvPjxyZWN0IHk9IjEyIiB3aWR0aD0iNjAiIGhlaWdodD0iNiIgZmlsbD0iI0M4MTAyRSIvPjwvc3ZnPg==" alt="" aria-hidden="true" class="flag">
+                    </button>
                 </div>
 
                 <!-- Logo -->
@@ -27,11 +32,11 @@
                 </div>
 
                 <!-- Notification Bell -->
-                <div class="notification">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <button type="button" class="notification" aria-label="Notifications">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                         <path d="M12 2C13.1 2 14 2.9 14 4C14 4.74 13.6 5.39 13 5.73V7H14C17.31 7 20 9.69 20 13V16L22 18V19H2V18L4 16V13C4 9.69 6.69 7 10 7H11V5.73C10.4 5.39 10 4.74 10 4C10 2.9 10.9 2 12 2ZM12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22Z" fill="#D4AF37"/>
                     </svg>
-                </div>
+                </button>
             </div>
 
             <!-- Bottom Row: Navigation -->
@@ -47,9 +52,10 @@
         </div>
     </header>
 
+    <main id="main">
     <!-- Hero Section -->
     <section id="accueil" class="hero">
-        <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_1920,h_1080,c_fill,q_100,f_auto,dpr_auto,fl_progressive/v1759672374/WhatsApp_Image_2025-10-05_at_00.46.13_6cf392eb_m93rrj.jpg" alt="Hero Background" class="hero-background-image">
+        <img src="https://res.cloudinary.com/dzadublkk/image/upload/w_1920,h_1080,c_fill,q_100,f_auto,dpr_auto,fl_progressive/v1759672374/WhatsApp_Image_2025-10-05_at_00.46.13_6cf392eb_m93rrj.jpg" alt="" aria-hidden="true" class="hero-background-image">
         <div class="hero-background">
             <div class="hero-overlay"></div>
         </div>
@@ -57,7 +63,7 @@
             <div class="hero-text">
                 <h1 class="hero-title" data-translate="hero_title">ACCUEILLIR AUTREMENT</h1>
                 <p class="hero-subtitle" data-translate="hero_subtitle">Accompagnement personnel Ultra VIP au service de vos événements</p>
-                <button class="cta-button" data-translate="hero_cta">DÉCOUVRIR</button>
+                <a class="cta-button" href="services.html" data-translate="hero_cta" role="button">DÉCOUVRIR</a>
             </div>
         </div>
     </section>
@@ -163,36 +169,36 @@
                 <div class="carousel-track">
                     <!-- First set of logos -->
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_01caeb2d-removebg-preview_kaa7yy.png" alt="Partner Logo 1" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_01caeb2d-removebg-preview_kaa7yy.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_7bfe3546-removebg-preview_ibkxdf.png" alt="Partner Logo 2" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_7bfe3546-removebg-preview_ibkxdf.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305604/WhatsApp_Image_2025-09-20_at_17.22.08_d50bd097-removebg-preview_mkvtz1.png" alt="Partner Logo 3" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305604/WhatsApp_Image_2025-09-20_at_17.22.08_d50bd097-removebg-preview_mkvtz1.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305604/WhatsApp_Image_2025-09-20_at_17.22.08_c1878eb4-removebg-preview_onzje6.png" alt="Partner Logo 4" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305604/WhatsApp_Image_2025-09-20_at_17.22.08_c1878eb4-removebg-preview_onzje6.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305603/WhatsApp_Image_2025-09-20_at_17.22.09_22bc7346-removebg-preview_uswodl.png" alt="Partner Logo 5" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305603/WhatsApp_Image_2025-09-20_at_17.22.09_22bc7346-removebg-preview_uswodl.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <!-- Duplicate logos for seamless loop -->
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_01caeb2d-removebg-preview_kaa7yy.png" alt="Partner Logo 1" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_01caeb2d-removebg-preview_kaa7yy.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_7bfe3546-removebg-preview_ibkxdf.png" alt="Partner Logo 2" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305605/WhatsApp_Image_2025-09-20_at_17.22.08_7bfe3546-removebg-preview_ibkxdf.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                     
                     <div class="logo-item">
-                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305604/WhatsApp_Image_2025-09-20_at_17.22.08_d50bd097-removebg-preview_mkvtz1.png" alt="Partner Logo 3" class="partner-logo">
+                        <img src="https://res.cloudinary.com/dzadublkk/image/upload/v1759305604/WhatsApp_Image_2025-09-20_at_17.22.08_d50bd097-removebg-preview_mkvtz1.png" class="partner-logo" alt="" aria-hidden="true">
                     </div>
                 </div>
             </div>
@@ -248,6 +254,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
@@ -272,8 +279,8 @@
             </nav>
 
             <!-- Icon -->
-            <div class="footer-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="footer-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                     <rect x="3" y="3" width="18" height="18" rx="2" stroke="#D4AF37" stroke-width="2"/>
                     <rect x="7" y="7" width="10" height="10" rx="1" stroke="#D4AF37" stroke-width="2"/>
                 </svg>
@@ -281,6 +288,7 @@
         </div>
     </footer>
 
+    <div id="a11y-live" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
     <script src="main.js"></script>
 </body>
 </html>
