@@ -1,9 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const nodemailer = require('nodemailer');
 const path = require('path');
-const fs = require('fs');
 const https = require('https');
 require('dotenv').config();
 
@@ -57,89 +55,9 @@ const escapeHtml = (value) => String(value == null ? '' : value)
 // Serve static files from frontend
 app.use(express.static(path.join(__dirname, '../haltea-frontend')));
 
-// Email configuration with multiple SMTP providers
-const createTransporter = (provider = 'gmail') => {
-    const configs = {
-        gmail: {
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            tls: {
-                rejectUnauthorized: false,
-                ciphers: 'SSLv3'
-            },
-            connectionTimeout: 5000,
-            greetingTimeout: 3000,
-            socketTimeout: 5000,
-            pool: false,
-            maxConnections: 1,
-            maxMessages: 1,
-            logger: false,
-            debug: false
-        },
-        gmail_ssl: {
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            },
-            tls: {
-                rejectUnauthorized: false,
-                minVersion: 'TLSv1'
-            },
-            connectionTimeout: 5000,
-            greetingTimeout: 3000,
-            socketTimeout: 5000,
-            pool: false,
-            maxConnections: 1,
-            maxMessages: 1,
-            logger: false,
-            debug: false
-        },
-        sendgrid: {
-            host: 'smtp.sendgrid.net',
-            port: 587,
-            secure: false,
-            auth: {
-                user: 'apikey',
-                pass: process.env.SENDGRID_API_KEY || ''
-            },
-            tls: {
-                rejectUnauthorized: false
-            },
-            connectionTimeout: 5000,
-            greetingTimeout: 3000,
-            socketTimeout: 5000,
-            pool: false
-        },
-        mailgun: {
-            host: 'smtp.mailgun.org',
-            port: 587,
-            secure: false,
-            auth: {
-                user: process.env.MAILGUN_USER || '',
-                pass: process.env.MAILGUN_PASS || ''
-            },
-            tls: {
-                rejectUnauthorized: false
-            },
-            connectionTimeout: 5000,
-            greetingTimeout: 3000,
-            socketTimeout: 5000,
-            pool: false
-        }
-    };
-    
-    return nodemailer.createTransport(configs[provider] || configs.gmail);
-};
-
-// SendGrid HTTP API email sender (bypasses SMTP blockage)
+// SendGrid HTTP API email sender — only delivery path (SMTP ports are blocked
+// on most cloud hosts including Render, so the SMTP fallbacks were dead weight
+// that just delayed the user's response).
 const sendEmailViaSendGrid = (formData, mailOptions) => {
     return new Promise((resolve, reject) => {
         const apiKey = process.env.SENDGRID_API_KEY;
@@ -279,24 +197,24 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
         tooLong(req.body.phone, MAX_PHONE) || tooLong(req.body.message, MAX_MESSAGE)) {
         return res.status(400).json({ success: false, message: 'Champ trop long.' });
     }
-    console.log('\n🔧 Environment variables check:');
-    console.log('   EMAIL_USER:', process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : '❌ Missing');
-    console.log('   EMAIL_PASS:', process.env.EMAIL_PASS ? `✅ Set (length: ${process.env.EMAIL_PASS.length})` : '❌ Missing');
-    console.log('   RECIPIENT_EMAIL:', process.env.RECIPIENT_EMAIL ? `✅ ${process.env.RECIPIENT_EMAIL}` : '❌ Missing');
-    console.log('   SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? `✅ Set (length: ${process.env.SENDGRID_API_KEY.length})` : '❌ Not configured');
-    
-    // Extract and validate data first
+    // Required configuration check (logged once per request without leaking values)
+    if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_USER || !process.env.RECIPIENT_EMAIL) {
+        console.error('❌ Email configuration incomplete. Required env vars: SENDGRID_API_KEY, EMAIL_USER, RECIPIENT_EMAIL');
+        return res.status(503).json({
+            success: false,
+            code: 'EMAIL_NOT_CONFIGURED',
+            message: 'Le service de messagerie est temporairement indisponible. Veuillez nous écrire directement à ' + (process.env.RECIPIENT_EMAIL || 'haltea.event@gmail.com') + '.'
+        });
+    }
+
+    // Extract and validate data
     const { name, email, phone, message } = req.body;
-    
-    // Validation
     if (!name || !email || !message) {
         return res.status(400).json({
             success: false,
             message: 'Nom, email et message sont requis'
         });
     }
-    
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         return res.status(400).json({
@@ -304,177 +222,49 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
             message: 'Format d\'email invalide'
         });
     }
-    
-    // Prepare email data (moved outside try block)
+
     const formData = {
         name: name.trim(),
         email: email.trim(),
         phone: phone ? phone.trim() : '',
         message: message.trim(),
-        clientIP: req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'Unknown',
+        clientIP: req.ip || 'Unknown',
         userAgent: req.get('User-Agent') || 'Unknown'
     };
-    
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: process.env.RECIPIENT_EMAIL,
+        subject: `Nouveau Message - ${formData.name} - Conciergerie de Luxe`,
+        html: createEmailTemplate(formData),
+        replyTo: formData.email
+    };
+
     try {
-        // Email options
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: process.env.RECIPIENT_EMAIL,
-            subject: `Nouveau Message - ${formData.name} - Conciergerie de Luxe`,
-            html: createEmailTemplate(formData),
-            replyTo: formData.email
-        };
-        
-        // FIRST: Try SendGrid HTTP API (bypasses SMTP blockage)
-        console.log('\n🚀 TRYING SENDGRID HTTP API (BYPASS SMTP)...');
-        try {
-            const result = await sendEmailViaSendGrid(formData, mailOptions);
-            console.log(`\n🎉 SUCCESS! Email sent via SendGrid HTTP API`);
-            console.log(`📧 Status Code: ${result.statusCode}`);
-            console.log(`📨 Response: ${result.response}`);
-            
-            return res.status(200).json({
-                success: true,
-                message: 'Message envoyé avec succès! Nous vous répondrons dans les plus brefs délais.',
-                messageId: result.messageId,
-                provider: 'sendgrid_http_api'
-            });
-        } catch (sendgridError) {
-            console.log(`\n❌ SendGrid HTTP API FAILED`);
-            console.log(`   Error: ${sendgridError.message}`);
-        }
-        
-        // FALLBACK: Try SMTP providers (likely to fail due to Render.com blocking)
-        console.log('\n📧 Falling back to SMTP providers...');
-        const providers = ['gmail', 'gmail_ssl', 'sendgrid', 'mailgun'];
-        let lastError = null;
-        let successfulProvider = null;
-        
-        for (const provider of providers) {
-            try {
-                console.log(`\n🔧 Attempting ${provider} SMTP provider...`);
-                console.log(`⏰ Timeout: 10 seconds`);
-                
-                // Add timeout wrapper for each provider attempt
-                const emailPromise = (async () => {
-                    const transporter = createTransporter(provider);
-                    console.log(`✅ ${provider} transporter created`);
-                    
-                    // Verify transporter configuration
-                    console.log(`🔍 Verifying ${provider} connection...`);
-                    await transporter.verify();
-                    console.log(`✅ ${provider} connection verified`);
-                    
-                    console.log(`📤 Sending email via ${provider}...`);
-                    const result = await transporter.sendMail(mailOptions);
-                    console.log(`✅ ${provider} send completed`);
-                    
-                    return result;
-                })();
-                
-                // Race between email sending and timeout (10 seconds)
-                const timeoutPromise = new Promise((_, reject) => {
-                    setTimeout(() => reject(new Error(`${provider} timeout after 10 seconds`)), 10000);
-                });
-                
-                const info = await Promise.race([emailPromise, timeoutPromise]);
-                
-                console.log(`\n🎉 SUCCESS! Email sent via ${provider}`);
-                console.log(`📧 Message ID: ${info.messageId}`);
-                console.log(`📨 Response: ${info.response}`);
-                
-                successfulProvider = provider;
-                
-                return res.status(200).json({
-                    success: true,
-                    message: 'Message envoyé avec succès! Nous vous répondrons dans les plus brefs délais.',
-                    messageId: info.messageId,
-                    provider: provider
-                });
-                
-            } catch (providerError) {
-                console.log(`\n❌ ${provider} FAILED`);
-                console.log(`   Error: ${providerError.message}`);
-                console.log(`   Code: ${providerError.code || 'N/A'}`);
-                console.log(`   Command: ${providerError.command || 'N/A'}`);
-                console.log(`   Response: ${providerError.response || 'N/A'}`);
-                console.log(`   ResponseCode: ${providerError.responseCode || 'N/A'}`);
-                
-                // Gmail-specific diagnostics
-                if (provider.includes('gmail')) {
-                    console.log('\n🔍 Gmail Diagnostics:');
-                    if (providerError.code === 'ETIMEDOUT') {
-                        console.log('   ⚠️  Network timeout - Cannot reach Gmail SMTP servers');
-                        console.log('   💡 Possible causes:');
-                        console.log('      1. Firewall blocking outgoing SMTP connections');
-                        console.log('      2. Network routing issues');
-                        console.log('      3. ISP blocking SMTP ports');
-                    } else if (providerError.code === 'EAUTH' || providerError.responseCode === 535) {
-                        console.log('   ⚠️  Authentication failed');
-                        console.log('   💡 Check:');
-                        console.log('      1. Using App Password (not regular password)?');
-                        console.log('      2. 2FA enabled on Gmail account?');
-                        console.log('      3. App Password not expired/revoked?');
-                        console.log('      4. "Less secure app access" disabled (use App Password)?');
-                    } else if (providerError.code === 'ECONNECTION') {
-                        console.log('   ⚠️  Connection refused');
-                        console.log('   💡 Gmail SMTP might be temporarily unavailable');
-                    }
-                }
-                
-                lastError = providerError;
-                continue;
-            }
-        }
-        
-        // If all providers failed, log detailed error info
-        console.log('\n⚠️  ALL SMTP PROVIDERS FAILED');
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('📝 FORM DATA FOR MANUAL PROCESSING:');
-        console.log(JSON.stringify(formData, null, 2));
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-        console.log('⚠️  Last Error:', lastError.message);
-        console.log('⚠️  Error Code:', lastError.code);
-        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-        
-        // Save to file as fallback
-        const failedEmailsPath = path.join(__dirname, 'failed_emails.log');
-        const logEntry = `\n[${new Date().toISOString()}] FAILED EMAIL\n${JSON.stringify(formData, null, 2)}\nError: ${lastError.message}\n${'='.repeat(80)}\n`;
-        
-        try {
-            fs.appendFileSync(failedEmailsPath, logEntry);
-            console.log('✅ Failed email logged to file: failed_emails.log');
-        } catch (fsError) {
-            console.log('❌ Could not write to log file:', fsError.message);
-        }
-        
-        // Return success to user (graceful degradation)
+        console.log('🚀 Sending via SendGrid HTTP API...');
+        const result = await sendEmailViaSendGrid(formData, mailOptions);
+        console.log(`🎉 Email sent. Message-ID: ${result.messageId}`);
         return res.status(200).json({
             success: true,
-            message: 'Message reçu! Nous vous contacterons dans les plus brefs délais.',
-            note: 'Your message has been received and logged for manual processing.'
+            message: 'Message envoyé avec succès! Nous vous répondrons dans les plus brefs délais.',
+            messageId: result.messageId
         });
-        
     } catch (error) {
-        console.error('❌ Error sending email:', error);
-        console.error('Error details:', {
-            code: error.code,
-            command: error.command,
-            errno: error.errno,
-            syscall: error.syscall,
-            message: error.message,
-            stack: error.stack
-        });
-        
-        // Log the form data for manual processing if email fails
-        console.log('📝 Form data received (for manual processing):', JSON.stringify(formData, null, 2));
-        
-        // Return appropriate error response
-        const errorMessage = error.message || 'Erreur interne du serveur';
-        res.status(500).json({
+        // Log the failure with the form data so the operator can see lost messages
+        // in the platform's log stream (Render, Heroku, etc.).
+        console.error('❌ SendGrid send failed:', error.message);
+        console.error('📝 Lost submission payload:', JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            messagePreview: formData.message.slice(0, 200)
+        }));
+        // Return a real failure so the frontend can offer a retry / mailto fallback.
+        return res.status(502).json({
             success: false,
-            message: 'Erreur lors de l\'envoi du message. Veuillez réessayer plus tard.',
-            debug: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+            code: 'EMAIL_DELIVERY_FAILED',
+            message: 'Erreur lors de l\'envoi du message. Veuillez réessayer dans quelques minutes ou nous écrire directement à ' + process.env.RECIPIENT_EMAIL + '.',
+            recipient: process.env.RECIPIENT_EMAIL
         });
     }
 });

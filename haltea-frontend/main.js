@@ -415,9 +415,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     console.log('✅ Validation passed');
-                    console.log('📤 Sending request to:', 'https://haltea-server.onrender.com/api/contact');
-                    
-                    // Transform form data to match backend API expectations.
+
+                    // API base: same-origin by default (backend also serves the frontend).
+                    // Override at runtime by setting window.HALTEA_API_BASE on a different host.
+                    const API_BASE = (typeof window !== 'undefined' && window.HALTEA_API_BASE) || '';
+                    const apiUrl = `${API_BASE}/api/contact`;
+
                     // The honeypot value is forwarded so the backend can drop bot submissions.
                     const honeypotEl = contactForm.querySelector('input[name="website"]');
                     const apiData = {
@@ -427,33 +430,30 @@ document.addEventListener('DOMContentLoaded', function() {
                         message: formData.message,
                         website: honeypotEl ? honeypotEl.value : ''
                     };
-                    
-                    console.log('📤 Sending API data:', apiData);
-                    
-                    const response = await fetch('https://haltea-server.onrender.com/api/contact', {
+
+                    const response = await fetch(apiUrl, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(apiData)
                     });
-                    
-                    console.log('📥 Response received:', response.status, response.statusText);
-                    const result = await response.json();
-                    console.log('📥 Response data:', result);
-                    
-                    if (result.success) {
-                        console.log('✅ Success! Email sent with ID:', result.messageId);
+
+                    const result = await response.json().catch(() => ({}));
+                    console.log('📥 Response:', response.status, result);
+
+                    if (response.ok && result.success) {
                         showSuccessMessage();
                         contactForm.reset();
                     } else {
-                        console.log('❌ Server returned error:', result.message);
-                        showGeneralError();
+                        // Real failure — show retry/mailto fallback rather than a vague banner.
+                        showGeneralError({
+                            message: result.message,
+                            recipient: result.recipient
+                        });
                     }
-                    
+
                 } catch (error) {
                     console.error('❌ Network/Request error:', error);
-                    showGeneralError();
+                    showGeneralError({ networkError: true });
                 } finally {
                     // Reset button
                     submitBtn.querySelector('.button-text').textContent = originalText;
@@ -491,29 +491,54 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 5000);
         }
 
-        // Show general error message
-        function showGeneralError() {
+        // Show general error message — accepts optional context to render an
+        // mailto fallback when delivery fails (vs. generic validation errors).
+        function showGeneralError(opts = {}) {
             const existingMessage = document.querySelector('.form-message');
             if (existingMessage) existingMessage.remove();
 
             const errorDiv = document.createElement('div');
             errorDiv.className = 'form-message error';
             errorDiv.setAttribute('role', 'alert');
-            errorDiv.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                    <circle cx="12" cy="12" r="10" stroke="#f44336" stroke-width="2"/>
-                    <line x1="15" y1="9" x2="9" y2="15" stroke="#f44336" stroke-width="2"/>
-                    <line x1="9" y1="9" x2="15" y2="15" stroke="#f44336" stroke-width="2"/>
-                </svg>
-                <span>Veuillez corriger les erreurs dans le formulaire.</span>
-            `;
+
+            // Build via DOM to keep the message safe from injection
+            const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            icon.setAttribute('width', '20');
+            icon.setAttribute('height', '20');
+            icon.setAttribute('viewBox', '0 0 24 24');
+            icon.setAttribute('fill', 'none');
+            icon.setAttribute('aria-hidden', 'true');
+            icon.setAttribute('focusable', 'false');
+            icon.innerHTML = '<circle cx="12" cy="12" r="10" stroke="#f44336" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#f44336" stroke-width="2"/><line x1="9" y1="9" x2="15" y2="15" stroke="#f44336" stroke-width="2"/>';
+            errorDiv.appendChild(icon);
+
+            const wrap = document.createElement('span');
+            const isDeliveryFailure = opts.networkError || opts.message;
+            const recipient = opts.recipient || 'haltea.event@gmail.com';
+            const txt = isDeliveryFailure
+                ? (opts.message || 'Erreur de connexion au serveur. Veuillez réessayer.')
+                : 'Veuillez corriger les erreurs dans le formulaire.';
+            wrap.appendChild(document.createTextNode(txt));
+
+            // Add mailto fallback when delivery actually failed
+            if (isDeliveryFailure) {
+                wrap.appendChild(document.createElement('br'));
+                const mailto = document.createElement('a');
+                mailto.href = 'mailto:' + recipient;
+                mailto.textContent = 'Écrivez-nous directement à ' + recipient;
+                mailto.style.color = '#D4AF37';
+                mailto.style.textDecoration = 'underline';
+                wrap.appendChild(mailto);
+            }
+            errorDiv.appendChild(wrap);
 
             contactForm.insertBefore(errorDiv, contactForm.firstChild);
-            announce('Veuillez corriger les erreurs dans le formulaire.', true);
+            announce(txt, true);
 
-            setTimeout(() => {
-                errorDiv.remove();
-            }, 5000);
+            // Delivery-failure messages stay until dismissed; validation errors auto-clear.
+            if (!isDeliveryFailure) {
+                setTimeout(() => { errorDiv.remove(); }, 5000);
+            }
         }
     }
 
