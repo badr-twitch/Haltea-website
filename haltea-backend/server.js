@@ -13,8 +13,10 @@ app.set('trust proxy', 1);
 
 // CORS allowlist — configurable via ALLOWED_ORIGINS env (comma-separated).
 // Same-origin requests have no Origin header and are allowed.
+// Production domain is included by default so the form keeps working even if the
+// Render env var is unset; override with ALLOWED_ORIGINS to restrict further.
 const allowedOrigins = (process.env.ALLOWED_ORIGINS ||
-    'https://haltea-server.onrender.com,http://localhost:3001')
+    'https://halteaevents.fr,https://www.halteaevents.fr,https://haltea-server.onrender.com,http://localhost:3001')
     .split(',').map(o => o.trim()).filter(Boolean);
 
 app.use(cors({
@@ -22,11 +24,24 @@ app.use(cors({
         if (!origin) return cb(null, true);
         if (allowedOrigins.includes(origin)) return cb(null, true);
         console.warn(`⛔ CORS blocked origin: ${origin}`);
-        return cb(new Error('Origin not allowed by CORS'));
+        // Pass null + false so cors responds without CORS headers instead of
+        // throwing — the browser will block the request, and direct (non-browser)
+        // callers get a clean 403 from the explicit check below.
+        return cb(null, false);
     },
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
+
+// Explicit 403 for disallowed origins on /api/* so non-browser callers get a
+// meaningful status instead of falling through to the generic 500 handler.
+app.use('/api', (req, res, next) => {
+    const origin = req.get('Origin');
+    if (origin && !allowedOrigins.includes(origin)) {
+        return res.status(403).json({ success: false, message: 'Origin not allowed.' });
+    }
+    next();
+});
 
 // Tighter body-size limits — a contact form does not need 10 MB
 app.use(express.json({ limit: '64kb' }));
