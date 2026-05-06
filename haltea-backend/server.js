@@ -70,34 +70,36 @@ const escapeHtml = (value) => String(value == null ? '' : value)
 // Serve static files from frontend
 app.use(express.static(path.join(__dirname, '../haltea-frontend')));
 
-// SendGrid HTTP API email sender — only delivery path (SMTP ports are blocked
-// on most cloud hosts including Render, so the SMTP fallbacks were dead weight
-// that just delayed the user's response).
-const sendEmailViaSendGrid = (formData, mailOptions) => {
+// Resend HTTP API email sender — only delivery path (SMTP ports are blocked
+// on most cloud hosts including Render). Replaced SendGrid after hitting the
+// "Maximum credits exceeded" 401 on the free tier; Resend's free tier is
+// 3000/month / 100/day which is plenty for a contact form.
+//
+// Required env: RESEND_API_KEY
+// Required env: EMAIL_USER must be on a verified domain in the Resend dashboard
+//   (Domains → Add Domain → DNS records). For halteaevents.fr, point the SPF
+//   and DKIM records at Resend per their setup instructions, otherwise sends
+//   are rejected with "domain is not verified".
+const sendEmailViaResend = (formData, mailOptions) => {
     return new Promise((resolve, reject) => {
-        const apiKey = process.env.SENDGRID_API_KEY;
-        
+        const apiKey = process.env.RESEND_API_KEY;
+
         if (!apiKey) {
-            return reject(new Error('SENDGRID_API_KEY not configured'));
+            return reject(new Error('RESEND_API_KEY not configured'));
         }
-        
+
         const emailData = JSON.stringify({
-            personalizations: [{
-                to: [{ email: mailOptions.to }],
-                subject: mailOptions.subject
-            }],
-            from: { email: mailOptions.from },
-            reply_to: { email: formData.email },
-            content: [{
-                type: 'text/html',
-                value: mailOptions.html
-            }]
+            from: mailOptions.from,
+            to: [mailOptions.to],
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+            reply_to: formData.email
         });
-        
+
         const options = {
-            hostname: 'api.sendgrid.com',
+            hostname: 'api.resend.com',
             port: 443,
-            path: '/v3/mail/send',
+            path: '/emails',
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
@@ -105,36 +107,39 @@ const sendEmailViaSendGrid = (formData, mailOptions) => {
                 'Content-Length': Buffer.byteLength(emailData)
             }
         };
-        
+
         const req = https.request(options, (res) => {
             let responseData = '';
-            
+
             res.on('data', (chunk) => {
                 responseData += chunk;
             });
-            
+
             res.on('end', () => {
-                if (res.statusCode === 202) {
+                // Resend returns 200 with { id: "..." } on success
+                if (res.statusCode === 200) {
+                    let parsed = {};
+                    try { parsed = JSON.parse(responseData); } catch (_) { /* non-JSON success body */ }
                     resolve({
-                        messageId: res.headers['x-message-id'] || 'sendgrid-success',
-                        response: 'Email sent successfully via SendGrid HTTP API',
+                        messageId: parsed.id || 'resend-success',
+                        response: 'Email sent successfully via Resend HTTP API',
                         statusCode: res.statusCode
                     });
                 } else {
-                    reject(new Error(`SendGrid API error: ${res.statusCode} - ${responseData}`));
+                    reject(new Error(`Resend API error: ${res.statusCode} - ${responseData}`));
                 }
             });
         });
-        
+
         req.on('error', (error) => {
             reject(error);
         });
-        
+
         req.on('timeout', () => {
             req.destroy();
-            reject(new Error('SendGrid API request timeout'));
+            reject(new Error('Resend API request timeout'));
         });
-        
+
         req.setTimeout(10000); // 10 second timeout
         req.write(emailData);
         req.end();
@@ -213,8 +218,8 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Champ trop long.' });
     }
     // Required configuration check (logged once per request without leaking values)
-    if (!process.env.SENDGRID_API_KEY || !process.env.EMAIL_USER || !process.env.RECIPIENT_EMAIL) {
-        console.error('❌ Email configuration incomplete. Required env vars: SENDGRID_API_KEY, EMAIL_USER, RECIPIENT_EMAIL');
+    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_USER || !process.env.RECIPIENT_EMAIL) {
+        console.error('❌ Email configuration incomplete. Required env vars: RESEND_API_KEY, EMAIL_USER, RECIPIENT_EMAIL');
         return res.status(503).json({
             success: false,
             code: 'EMAIL_NOT_CONFIGURED',
@@ -256,8 +261,8 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     };
 
     try {
-        console.log('🚀 Sending via SendGrid HTTP API...');
-        const result = await sendEmailViaSendGrid(formData, mailOptions);
+        console.log('🚀 Sending via Resend HTTP API...');
+        const result = await sendEmailViaResend(formData, mailOptions);
         console.log(`🎉 Email sent. Message-ID: ${result.messageId}`);
         return res.status(200).json({
             success: true,
@@ -267,7 +272,7 @@ app.post('/api/contact', contactLimiter, async (req, res) => {
     } catch (error) {
         // Log the failure with the form data so the operator can see lost messages
         // in the platform's log stream (Render, Heroku, etc.).
-        console.error('❌ SendGrid send failed:', error.message);
+        console.error('❌ Resend send failed:', error.message);
         console.error('📝 Lost submission payload:', JSON.stringify({
             name: formData.name,
             email: formData.email,

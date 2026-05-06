@@ -32,17 +32,13 @@ PayedProject/
 
 ### Backend
 - Express 5 server exposing a JSON API and serving the frontend statically.
-- Contact form pipeline with **graceful fallbacks**:
-  1. SendGrid HTTP API (primary — bypasses SMTP port blocks on cloud hosts).
-  2. Gmail SMTP (STARTTLS on 587).
-  3. Gmail SMTP (SSL on 465).
-  4. SendGrid SMTP.
-  5. Mailgun SMTP.
-  6. Local file log (`failed_emails.log`) as last-resort persistence.
+- Contact form delivery via **Resend HTTP API** (one provider, real failures surfaced
+  to the client with a mailto fallback — no silent black-hole logging).
 - Branded HTML email template (luxury black/gold) with client info, message, and request metadata.
-- Server-side validation (required fields, email regex).
-- CORS, JSON/urlencoded parsing with 10 MB limits.
-- Health check endpoint and detailed diagnostic logging.
+- Server-side validation (required fields, email regex), per-field length caps, honeypot
+  field, and per-IP rate limiting (5 submissions / 10 min).
+- CORS allowlist (configurable via `ALLOWED_ORIGINS`), JSON/urlencoded parsing capped at 64 KB.
+- Health check endpoint and structured diagnostic logging that never echoes secrets.
 
 ## API Endpoints
 
@@ -69,8 +65,7 @@ Successful response:
 {
   "success": true,
   "message": "Message envoyé avec succès! Nous vous répondrons dans les plus brefs délais.",
-  "messageId": "...",
-  "provider": "sendgrid_http_api"
+  "messageId": "..."
 }
 ```
 
@@ -78,7 +73,7 @@ Successful response:
 
 - Node.js 18 or newer.
 - npm.
-- An email provider account (SendGrid recommended; Gmail App Password, or Mailgun also supported).
+- A [Resend](https://resend.com/) account with an API key and a verified sending domain.
 
 ## Installation
 
@@ -91,12 +86,10 @@ Create a `.env` file in `haltea-backend/`:
 
 ```env
 PORT=3001
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-gmail-app-password
-RECIPIENT_EMAIL=contact@yourdomain.com
-SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxx
-MAILGUN_USER=postmaster@your-mailgun-domain
-MAILGUN_PASS=your-mailgun-password
+EMAIL_USER=contact@yourdomain.com          # must be on a Resend-verified domain
+RECIPIENT_EMAIL=inbox@yourdomain.com       # where contact-form messages are delivered
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxx
+ALLOWED_ORIGINS=https://yourdomain.com     # comma-separated, optional
 NODE_ENV=development
 ```
 
@@ -112,28 +105,29 @@ The server listens on `http://localhost:3001` and serves the frontend from `../h
 
 ## Environment Variables
 
-| Variable            | Required | Description                                              |
-|---------------------|----------|----------------------------------------------------------|
-| `PORT`              | No       | HTTP port (default `3001`).                              |
-| `EMAIL_USER`        | Yes\*    | Gmail sender address.                                    |
-| `EMAIL_PASS`        | Yes\*    | Gmail App Password (not your account password).          |
-| `RECIPIENT_EMAIL`   | Yes      | Inbox that receives contact-form notifications.          |
-| `SENDGRID_API_KEY`  | Reco.    | Enables the SendGrid HTTP API path (recommended).        |
-| `MAILGUN_USER`      | No       | Mailgun SMTP username.                                   |
-| `MAILGUN_PASS`      | No       | Mailgun SMTP password.                                   |
-| `NODE_ENV`          | No       | `development` exposes debug error messages.              |
-
-\* At least one working provider must be configured. SendGrid HTTP API is preferred on platforms (Render, Heroku) that block outbound SMTP.
+| Variable            | Required | Description                                                       |
+|---------------------|----------|-------------------------------------------------------------------|
+| `PORT`              | No       | HTTP port (default `3001`).                                       |
+| `EMAIL_USER`        | Yes      | `From:` address; must be on a Resend-verified domain.             |
+| `RECIPIENT_EMAIL`   | Yes      | Inbox that receives contact-form notifications.                   |
+| `RESEND_API_KEY`    | Yes      | Resend API key (`re_…`).                                          |
+| `ALLOWED_ORIGINS`   | No       | Comma-separated CORS allowlist; defaults cover the production domain. |
+| `NODE_ENV`          | No       | `development` exposes debug error messages.                       |
 
 ## Email Delivery Strategy
 
-The backend tries providers in order and short-circuits on the first success. Each SMTP attempt is wrapped in a 10-second timeout. If every provider fails, the request still returns `200 OK` to the client and the submission is appended to `failed_emails.log` for manual processing — protecting the user experience while preserving the lead.
+The backend POSTs to `https://api.resend.com/emails`. On `200 OK` the submission's
+`message_id` is returned to the client. On any other status the failure is logged
+with the lost submission's payload (so it's recoverable from the platform log
+stream) and the API returns `502 EMAIL_DELIVERY_FAILED` to the client — which
+surfaces a localized error banner with a `mailto:` fallback to the recipient
+inbox. There is no silent on-disk queue; failures are real and visible.
 
 ## Deployment Notes
 
-- **Render / Heroku / Fly.io**: Outbound SMTP (ports 25/465/587) is often blocked. Configure `SENDGRID_API_KEY` so the HTTP API path succeeds.
-- **VPS (DigitalOcean, OVH, etc.)**: SMTP works directly; PM2 + Nginx reverse proxy is recommended.
-- **Static-only hosting**: The frontend can be served independently from any CDN; point its contact form to the backend's public URL.
+- **Render / Heroku / Fly.io**: Outbound SMTP (ports 25/465/587) is often blocked, which is why this backend uses Resend's HTTP API rather than SMTP.
+- **Frontend served separately (Netlify, Vercel, CDN)**: point a `/api/*` rewrite at the backend's public URL so the form's relative `/api/contact` resolves same-origin.
+- **VPS (DigitalOcean, OVH, etc.)**: works the same way; the HTTP API call is portable across hosts.
 
 ## Security
 
