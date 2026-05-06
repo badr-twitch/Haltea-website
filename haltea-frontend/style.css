@@ -258,6 +258,8 @@ body:not(.contact-page) p,
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
+    text-decoration: none; /* anchor styled as button — kill the default underline */
+    display: inline-block;
     cursor: pointer;
     transition: all 0.4s ease;
     border-radius: 2px;
