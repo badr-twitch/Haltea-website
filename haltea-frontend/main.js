@@ -878,7 +878,7 @@ const translations = {
     'nav_accueil': 'HOME',
     'nav_conciergerie': 'CONCIERGE',
     'nav_nos_services': 'OUR SERVICES',
-    'nav_nos_réalisations': 'OUR REALIZATIONS',
+    'nav_nos_realisations': 'OUR REALIZATIONS',
     'nav_contact': 'CONTACT',
     
     // Homepage
@@ -981,7 +981,7 @@ const frenchTranslations = {
     'nav_accueil': 'ACCUEIL',
     'nav_conciergerie': 'CONCIERGERIE',
     'nav_nos_services': 'NOS SERVICES',
-    'nav_nos_réalisations': 'NOS RÉALISATIONS',
+    'nav_nos_realisations': 'NOS RÉALISATIONS',
     'nav_contact': 'CONTACT',
     
     // Homepage
