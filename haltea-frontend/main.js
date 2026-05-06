@@ -201,6 +201,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const lang = currentLanguage === 'en' ? 'en' : 'fr';
             return (errorMessages[lang] && errorMessages[lang][field]) || errorMessages.fr[field];
         }
+        // Banner / toast strings — kept here so getMessage() and t() share one source.
+        const uiText = {
+            fr: {
+                sending_button: 'ENVOI EN COURS...',
+                sending_announce: 'Envoi du message en cours...',
+                success: 'Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.',
+                generic_validation: 'Veuillez corriger les erreurs dans le formulaire.',
+                generic_network: 'Erreur de connexion au serveur. Veuillez réessayer.',
+                mailto_prefix: 'Écrivez-nous directement à '
+            },
+            en: {
+                sending_button: 'SENDING...',
+                sending_announce: 'Sending your message...',
+                success: 'Message sent successfully! We will respond as soon as possible.',
+                generic_validation: 'Please correct the errors in the form.',
+                generic_network: 'Connection error. Please try again.',
+                mailto_prefix: 'Write to us directly at '
+            }
+        };
+        function t(key) {
+            const lang = currentLanguage === 'en' ? 'en' : 'fr';
+            return (uiText[lang] && uiText[lang][key]) || uiText.fr[key];
+        }
         const validationRules = {
             civilite: { required: true, get message() { return getMessage('civilite'); } },
             nom: {
@@ -383,10 +406,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (isValid) {
                 // Show loading state
                 const originalText = submitBtn.querySelector('.button-text').textContent;
-                submitBtn.querySelector('.button-text').textContent = 'ENVOI EN COURS...';
+                submitBtn.querySelector('.button-text').textContent = t('sending_button');
                 submitBtn.disabled = true;
                 submitBtn.style.opacity = '0.7';
-                announce('Envoi du message en cours...');
+                announce(t('sending_announce'));
 
                 // Handle contact form submission
                 try {
@@ -480,11 +503,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     <path d="M9 12L11 14L15 10" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     <circle cx="12" cy="12" r="10" stroke="#4CAF50" stroke-width="2"/>
                 </svg>
-                <span>Message envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.</span>
+                <span></span>
             `;
-            
+            successDiv.querySelector('span').textContent = t('success');
+
             contactForm.insertBefore(successDiv, contactForm.firstChild);
-            announce('Message envoyé avec succès. Nous vous répondrons dans les plus brefs délais.');
+            announce(t('success'));
 
             setTimeout(() => {
                 successDiv.remove();
@@ -515,9 +539,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const wrap = document.createElement('span');
             const isDeliveryFailure = opts.networkError || opts.message;
             const recipient = opts.recipient || 'haltea.event@gmail.com';
+            // For delivery failures we prefer the localized fallback over the
+            // backend's French-only message so EN visitors see EN copy.
             const txt = isDeliveryFailure
-                ? (opts.message || 'Erreur de connexion au serveur. Veuillez réessayer.')
-                : 'Veuillez corriger les erreurs dans le formulaire.';
+                ? (opts.networkError ? t('generic_network') : (opts.message || t('generic_network')))
+                : t('generic_validation');
             wrap.appendChild(document.createTextNode(txt));
 
             // Add mailto fallback when delivery actually failed
@@ -525,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 wrap.appendChild(document.createElement('br'));
                 const mailto = document.createElement('a');
                 mailto.href = 'mailto:' + recipient;
-                mailto.textContent = 'Écrivez-nous directement à ' + recipient;
+                mailto.textContent = t('mailto_prefix') + recipient;
                 mailto.style.color = '#D4AF37';
                 mailto.style.textDecoration = 'underline';
                 wrap.appendChild(mailto);
